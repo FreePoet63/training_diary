@@ -2,10 +2,11 @@ package com.ylab.app.service;
 
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.workout.Workout;
+import com.ylab.app.model.workout.WorkoutAdditionalParams;
+import com.ylab.app.model.workout.WorkoutType;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * WorkoutService interface documentation.
@@ -24,7 +25,7 @@ public interface WorkoutService {
      *
      * @param workout the workout instance to add
      */
-    void addWorkout(Workout workout);
+    void addWorkout(User user, Workout workout);
 
     /**
      * Retrieves a list of workouts for a user on a specified date.
@@ -41,7 +42,7 @@ public interface WorkoutService {
      * @param updatedWorkout the workout instance containing updated information
      * @param workoutId      the identifier of the workout to be updated
      */
-    void editWorkout(Workout updatedWorkout, Long workoutId);
+    void editWorkout(User user, Workout updatedWorkout, Long workoutId);
 
     /**
      * Deletes a workout identified by a unique workoutId.
@@ -66,9 +67,9 @@ public interface WorkoutService {
      * @param user      the user for whom the statistics are to be retrieved
      * @param startDate the start date of the period
      * @param endDate   the end date of the period
-     * @return a map of additional parameter names and their aggregated values
+     * @return a list of additional parameter names and their aggregated values
      */
-    Map<String, Long> getAdditionalParamsStats(User user, LocalDateTime startDate, LocalDateTime endDate);
+    List<WorkoutAdditionalParams> getAdditionalParamsStats(User user, WorkoutType type, LocalDateTime startDate, LocalDateTime endDate);
 
     /**
      * Retrieves a list of all recorded workout sessions in the system.

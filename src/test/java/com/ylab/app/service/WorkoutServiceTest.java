@@ -1,5 +1,7 @@
 package com.ylab.app.service;
 
+import com.ylab.app.dbService.dao.WorkoutDao;
+import com.ylab.app.exception.userException.UserValidationException;
 import com.ylab.app.exception.workoutException.WorkoutException;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
@@ -11,144 +13,165 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
- * WorkoutServiceTest class
+ * WorkoutServiceTest class represents the test suite for validating the functionality of the WorkoutService class.
+ * It utilizes Mockito for mock-based unit testing.
  *
  * @author razlivinsky
  * @since 10.04.2024
  */
 @ExtendWith(MockitoExtension.class)
 public class WorkoutServiceTest {
-    private WorkoutService workoutService;
+    @Mock
+    private UserService userService;
 
-    private Workout workout;
+    @Mock
+    private WorkoutDao workoutDao;
+
+    @InjectMocks
+    private WorkoutServiceImpl workoutService;
+
     private User user;
-    private LocalDateTime now;
-
-    private Long workoutId = 1L;
-    private int duration = 120;
-    private int caloriesBurned = 350;
-    private List<WorkoutType> workoutTypes = new ArrayList<>();
-    private List<WorkoutAdditionalParams> listParams = new ArrayList<>();
+    private Workout workout;
+    private LocalDateTime date;
+    private Long workoutId;
+    private WorkoutAdditionalParams params;
+    private List<WorkoutAdditionalParams> listParams;
 
     @BeforeEach
     void setUp() {
-        workoutService = new WorkoutServiceImpl();
-        user = new User(1L, "test", "test", UserRole.ADMIN);
-        WorkoutType workoutType = new WorkoutType(1L, "strength");
-        workoutTypes.add(workoutType);
-        WorkoutAdditionalParams params = new WorkoutAdditionalParams(1L, "push-ups", 50L);
-        now = LocalDateTime.now();
+        user = new User("test", "test", UserRole.USER);
+        params = new WorkoutAdditionalParams(1L, "jumping", 50L);
+        listParams = new ArrayList<>();
         listParams.add(params);
+        date = LocalDateTime.now();
         workout = new Workout();
-        workout.setId(workoutId);
-        workout.setDate(now);
-        workout.setDuration(duration);
-        workout.setCaloriesBurned(caloriesBurned);
-        workout.setWorkoutTypes(workoutTypes);
+        workout.setType(WorkoutType.AEROBICS);
+        workout.setDate(date);
+        workout.setDuration(120);
+        workout.setCaloriesBurned(333);
         workout.setParams(listParams);
         workout.setUser(user);
+        workoutId = 1L;
     }
 
     @Test
-    @DisplayName("Add workout successfully")
-    void addWorkoutSuccessfully() {
-        workoutService.addWorkout(workout);
-        List<Workout> workouts = workoutService.getWorkoutsOnDate(user, now);
-        assertThat(workouts).contains(workout);
+    @DisplayName("Adding a workout should be successful")
+    void addWorkout_ShouldAddWorkout() throws SQLException {
+        doNothing().when(workoutDao).insertWorkout(any(Workout.class));
+
+        workoutService.addWorkout(user, workout);
+
+        verify(workoutDao).insertWorkout(workout);
     }
 
     @Test
-    @DisplayName("Throw exception when adding null workout")
-    void throwExceptionWhenAddingNullWorkout() {
-        assertThatThrownBy(() -> workoutService.addWorkout(null))
+    @DisplayName("Adding a workout should throw an exception if the workout is null")
+    void addWorkout_ShouldThrowException_WhenWorkoutIsNull() {
+        Workout nullWorkout = null;
+
+        assertThatThrownBy(() -> workoutService.addWorkout(user, nullWorkout))
                 .isInstanceOf(WorkoutException.class)
-                .hasMessageContaining("Ошибка при добавлении тренировки");
+                .hasMessageContaining("Incorrect workout!");
     }
 
     @Test
-    @DisplayName("Get workouts on specific date")
-    void getWorkoutsOnSpecificDate() {
-        workoutService.addWorkout(workout);
-        List<Workout> workouts = workoutService.getWorkoutsOnDate(user, now);
-        assertThat(workouts).hasSize(1);
-        assertThat(workouts.get(0).getDate()).isEqualTo(now);
+    @DisplayName("Getting workouts on a date should return a list of workouts")
+    void getWorkoutsOnDate_ShouldReturnWorkouts() throws SQLException {
+        List<Workout> expectedWorkouts = Collections.singletonList(workout);
+        when(workoutDao.findWorkoutsByUserAndDate(user, date)).thenReturn(expectedWorkouts);
+
+        List<Workout> actualWorkouts = workoutService.getWorkoutsOnDate(user, date);
+
+        assertThat(actualWorkouts).isEqualTo(expectedWorkouts);
     }
 
     @Test
-    @DisplayName("Get workouts on specific date is null")
-    void getWorkoutsOnSpecificDateNullValue() {
-        assertThatThrownBy(() -> workoutService.getWorkoutsOnDate(user, null))
-                .isInstanceOf(WorkoutException.class)
-                .hasMessageContaining("Incorrect date!");
+    @DisplayName("Getting workouts on a date should throw an exception if the user is null")
+    void getWorkoutsOnDate_ShouldThrowException_WhenUserIsNull() {
+        User nullUser = null;
+
+        assertThatThrownBy(() -> workoutService.getWorkoutsOnDate(nullUser, date))
+                .isInstanceOf(UserValidationException.class)
+                .hasMessageContaining("Invalid user.");
     }
 
     @Test
-    @DisplayName("Edit workout successfully")
-    void editWorkoutSuccessfully() {
-        workoutService.addWorkout(workout);
-        Workout updatedWorkout = new Workout();
-        updatedWorkout.setId(workout.getId());
-        updatedWorkout.setDate(now.plusDays(1));
-        updatedWorkout.setDuration(duration);
-        updatedWorkout.setCaloriesBurned(caloriesBurned);
-        updatedWorkout.setWorkoutTypes(workoutTypes);
-        updatedWorkout.setParams(listParams);
-        updatedWorkout.setUser(user);
+    @DisplayName("Editing a workout should be successful")
+    void editWorkout_ShouldEditWorkout() throws SQLException {
+        doNothing().when(workoutDao).editWorkout(any(Workout.class), eq(workoutId));
 
-        workoutService.editWorkout(updatedWorkout, workout.getId());
-        List<Workout> workouts = workoutService.getWorkoutsOnDate(user, now.plusDays(1));
-        assertThat(workouts).contains(updatedWorkout);
+        workoutService.editWorkout(user, workout, workoutId);
+
+        verify(workoutDao).editWorkout(workout, workoutId);
     }
 
     @Test
-    @DisplayName("Delete workout successfully")
-    void deleteWorkoutSuccessfully() {
-        workoutService.addWorkout(workout);
-        workoutService.deleteWorkout(workout.getId());
-        List<Workout> workouts = workoutService.getWorkoutsOnDate(user, now);
-        assertThat(workouts).doesNotContain(workout);
+    @DisplayName("Deleting a workout should be successful")
+    void deleteWorkout_ShouldDeleteWorkout() throws SQLException {
+        doNothing().when(workoutDao).deleteWorkout(workoutId);
+
+        workoutService.deleteWorkout(workoutId);
+
+        verify(workoutDao).deleteWorkout(workoutId);
     }
 
     @Test
-    @DisplayName("Calculate calories burned in time period")
-    void calculateCaloriesBurnedInTimePeriod() {
-        workoutService.addWorkout(workout);
-        int calories = workoutService.getCaloriesBurnedInTimePeriod(user, now.minusDays(1), now.plusDays(1));
-        assertThat(calories).isEqualTo(350);
+    @DisplayName("Calculating calories burned over a time period should be accurate")
+    void getCaloriesBurnedInTimePeriod_ShouldCalculateCalories() throws SQLException {
+        int expectedCalories = 500;
+        when(workoutDao.getTotalCaloriesBurnedByUser(user, date, date)).thenReturn(expectedCalories);
+
+        int actualCalories = workoutService.getCaloriesBurnedInTimePeriod(user, date, date);
+
+        assertThat(actualCalories).isEqualTo(expectedCalories);
     }
 
     @Test
-    @DisplayName("Get all workouts for admin user")
-    void getAllWorkoutsForAdminUser() {
-        workoutService.addWorkout(workout);
-        List<Workout> workouts = workoutService.getAllReadingsWorkouts(user);
-        assertThat(workouts).contains(workout);
+    @DisplayName("Getting statistics for additional parameters should return statistics")
+    void getAdditionalParamsStats_ShouldReturnStats() throws SQLException {
+        List<WorkoutAdditionalParams> expectedParams = Collections.emptyList();
+        when(workoutDao.findWorkoutParamsByTypeUserAndDate(user, WorkoutType.CARDIO, date, date)).thenReturn(expectedParams);
+
+        List<WorkoutAdditionalParams> actualParams = workoutService.getAdditionalParamsStats(user, WorkoutType.CARDIO, date, date);
+
+        assertThat(actualParams).isEqualTo(expectedParams);
     }
 
     @Test
-    @DisplayName("Get additional parameters statistics successfully")
-    void getAdditionalParamsStatsSuccessfully() {
-        workoutService.addWorkout(workout);
-        Map<String, Long> stats = workoutService.getAdditionalParamsStats(user, now.minusDays(1), now.plusDays(1));
-        assertThat(stats).containsEntry("push-ups", 50L);
+    @DisplayName("Getting all workouts should return a list of all workouts")
+    void getAllReadingsWorkouts_ShouldReturnAllWorkouts() throws SQLException {
+        List<Workout> expectedWorkouts = Collections.singletonList(workout);
+        when(userService.hasRoleAdmin(user)).thenReturn(true);
+        when(workoutDao.findAllWorkoutList()).thenReturn(expectedWorkouts);
+
+        List<Workout> actualWorkouts = workoutService.getAllReadingsWorkouts(user);
+
+        assertThat(actualWorkouts).isEqualTo(expectedWorkouts);
     }
 
     @Test
-    @DisplayName("Throw exception when getting additional parameters statistics with invalid user")
-    void throwExceptionWhenGettingStatsWithInvalidUser() {
-        assertThatThrownBy(() -> workoutService.getAdditionalParamsStats(user, null, now.plusDays(1)))
-                .isInstanceOf(WorkoutException.class)
-                .hasMessageContaining("Incorrect date!");
+    @DisplayName("Getting all workouts should throw an exception if the user is not an administrator")
+    void getAllReadingsWorkouts_ShouldThrowException_WhenUserIsNotAdmin() {
+        when(userService.hasRoleAdmin(user)).thenReturn(false);
+
+        assertThatThrownBy(() -> workoutService.getAllReadingsWorkouts(user))
+                .isInstanceOf(UserValidationException.class)
+                .hasMessageContaining("Invalid or unauthorized user");
     }
 }

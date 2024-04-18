@@ -11,10 +11,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
 public class User {
     private Long id;
     private String name;

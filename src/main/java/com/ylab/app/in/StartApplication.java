@@ -1,5 +1,6 @@
 package com.ylab.app.in;
 
+import com.ylab.app.dbService.migration.LiquibaseMigration;
 import com.ylab.app.model.audit.Audit;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
@@ -7,13 +8,14 @@ import com.ylab.app.model.workout.Workout;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
 import com.ylab.app.model.workout.WorkoutType;
 import com.ylab.app.service.Audition;
+import com.ylab.app.service.UserService;
+import com.ylab.app.service.WorkoutService;
 import com.ylab.app.service.impl.UserServiceImpl;
 import com.ylab.app.service.impl.WorkoutServiceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -26,9 +28,10 @@ import java.util.Scanner;
  */
 public class StartApplication {
     private static final Scanner scanner = new Scanner(System.in);
-    private static UserServiceImpl userService = new UserServiceImpl();
-    private static WorkoutServiceImpl workoutService = new WorkoutServiceImpl();
-    private static Audition audition = new Audition();
+    private static final LiquibaseMigration liquibaseMigration = new LiquibaseMigration();
+    private static final UserService userService = new UserServiceImpl();
+    private static final WorkoutService workoutService = new WorkoutServiceImpl();
+    private static final Audition audition = new Audition();
     private static User currentUser = null;
 
     /**
@@ -37,24 +40,31 @@ public class StartApplication {
      * @param args the input arguments
      */
     public static void main(String[] args) {
+        liquibaseMigration.performLiquibaseMigration();
         while (true) {
-            System.out.println("1. Register\n2. Login\n3. Exit");
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
             String input = scanner.nextLine();
 
-            switch (input) {
-                case "1":
+            String result = switch (input) {
+                case "1" -> {
                     registerUser();
-                    break;
-                case "2":
+                    yield "User registered.";
+                }
+                case "2" -> {
                     authorizeUser();
-                    break;
-                case "3":
+                    yield "User authorized.";
+                }
+                case "3" -> {
                     System.out.println(audition.getAuditLogs());
                     System.exit(0);
-                    break;
-                default:
-                    System.out.println("Wrong input. Please try again.");
-            }
+                    yield "Exiting program.";
+                }
+                default -> "Wrong input. Please try again.";
+            };
+
+            System.out.println(result);
         }
     }
 
@@ -66,10 +76,8 @@ public class StartApplication {
         String username = scanner.nextLine();
         System.out.println("Enter password:");
         String password = scanner.nextLine();
-        UserRole role = UserRole.ADMIN;
-
         try {
-            userService.registerUser(username, password, role);
+            userService.registerUser(username, password, UserRole.USER);
             System.out.println("User successfully registered.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -103,41 +111,34 @@ public class StartApplication {
             if (currentUser.getRole().equals(UserRole.ADMIN)) {
                 System.out.println("0. View all training");
             }
-            System.out.println("1. Add workout\n2. View workout\n3. Edit workout\n4. Delete workout\n5. Get calorie statistics\n6. Get statistics on parameters\n7. Logout");
+            System.out.println("1. Add workouts");
+            System.out.println("2. View workout");
+            System.out.println("3. Edit workout");
+            System.out.println("4. Delete workout");
+            System.out.println("5. Get calorie statistics");
+            System.out.println("6. Get statistics on parameters");
+            System.out.println("7. Logout");
             String input = scanner.nextLine();
 
             switch (input) {
-                case "0":
+                case "0" -> {
                     if (currentUser.getRole().equals(UserRole.ADMIN)) {
                         viewAllWorkouts();
                     } else {
                         System.out.println("Wrong input. Please try again.");
                     }
-                    break;
-                case "1":
-                    addWorkout();
-                    break;
-                case "2":
-                    viewWorkouts();
-                    break;
-                case "3":
-                    editWorkout();
-                    break;
-                case "4":
-                    deleteWorkout();
-                    break;
-                case "5":
-                    getStatistics();
-                    break;
-                case "6":
-                    getStatisticsParams();
-                    break;
-                case "7":
+                }
+                case "1" -> addWorkout();
+                case "2" -> viewWorkouts();
+                case "3" -> editWorkout();
+                case "4" -> deleteWorkout();
+                case "5" -> getStatistics();
+                case "6" -> getStatisticsParams();
+                case "7" -> {
                     currentUser = null;
                     System.out.println("You have left your account.");
-                    break;
-                default:
-                    System.out.println("Wrong input. Please try again.");
+                }
+                default -> System.out.println("Wrong input. Please try again.");
             }
         }
     }
@@ -155,7 +156,8 @@ public class StartApplication {
     private static void getStatisticsParams() {
         LocalDateTime startTime = getDateFromUser("Enter start date ");
         LocalDateTime endTime = getDateFromUser("Enter end date ");
-        Map<String, Long> result = workoutService.getAdditionalParamsStats(currentUser, startTime, endTime);
+        WorkoutType type = getWorkoutTypeFromUser();
+        List<WorkoutAdditionalParams> result = workoutService.getAdditionalParamsStats(currentUser, type, startTime, endTime);
         System.out.println(currentUser + " " + result);
         audition.auditAction(currentUser, Audit.STATISTICS_PARAMS);
     }
@@ -177,7 +179,7 @@ public class StartApplication {
     private static void addWorkout() {
         try {
             Workout workout = createWorkoutFromUserInput(null);
-            workoutService.addWorkout(workout);
+            workoutService.addWorkout(currentUser, workout);
             System.out.println("Workout added successfully:");
             System.out.println(workout);
             audition.auditAction(currentUser, Audit.ADD_WORKOUT);
@@ -197,9 +199,9 @@ public class StartApplication {
 
         Workout workout = createWorkoutFromUserInput(workoutId);
 
-        workoutService.editWorkout(workout, workoutId);
+        workoutService.editWorkout(currentUser, workout, workoutId);
         audition.auditAction(currentUser, Audit.EDIT_WORKOUT);
-        System.out.println("Workout successfully edition.");
+        System.out.println("Workout successfully edited.");
     }
 
     /**
@@ -231,16 +233,19 @@ public class StartApplication {
     private static Workout createWorkoutFromUserInput(Long existingWorkoutId) {
         LocalDateTime date = LocalDateTime.now();
         int duration = getIntFromUser("Enter duration: ");
-        int caloriesBurned = getIntFromUser("Inject the amount of calories burned: ");
-        List<WorkoutType> workoutTypes = getWorkoutTypesFromUser();
+        int caloriesBurned = getIntFromUser("Enter the amount of calories burned: ");
+        WorkoutType workoutType = getWorkoutTypeFromUser();
+
         List<WorkoutAdditionalParams> listParams = getWorkoutParamsFromUser();
 
         Workout newWorkout = new Workout();
-        newWorkout.setId(existingWorkoutId != null ? existingWorkoutId : getLongFromUser("Enter ID workout:"));
+        if (existingWorkoutId != null) {
+            newWorkout.setId(existingWorkoutId);
+        }
+        newWorkout.setType(workoutType);
         newWorkout.setDate(date);
         newWorkout.setDuration(duration);
         newWorkout.setCaloriesBurned(caloriesBurned);
-        newWorkout.setWorkoutTypes(workoutTypes);
         newWorkout.setParams(listParams);
         newWorkout.setUser(currentUser);
 
@@ -250,16 +255,21 @@ public class StartApplication {
     /**
      * Retrieves workout types data from the user for a new workout creation.
      *
-     * @return a list of workout types
+     * @return of workout types
      */
-    private static List<WorkoutType> getWorkoutTypesFromUser() {
-        int sizeType = getIntFromUser("Enter number of workout types:");
-        List<WorkoutType> workoutTypes = new ArrayList<>();
-        for (int i = 0; i < sizeType; i++) {
-            String type = getStringFromUser("Enter workout type " + (i + 1) + ":");
-            workoutTypes.add(WorkoutType.add(type));
+    private static WorkoutType getWorkoutTypeFromUser() {
+        System.out.println("Available workout types:");
+        for (WorkoutType type : WorkoutType.values()) {
+            System.out.println((type.ordinal() + 1) + ". " + type);
         }
-        return workoutTypes;
+
+        int typeIndex = getIntFromUser("Enter the number for the workout type:") - 1;
+        if (typeIndex >= 0 && typeIndex < WorkoutType.values().length) {
+            return WorkoutType.values()[typeIndex];
+        } else {
+            System.out.println("Invalid number. Please try again.");
+            return getWorkoutTypeFromUser();
+        }
     }
 
     /**

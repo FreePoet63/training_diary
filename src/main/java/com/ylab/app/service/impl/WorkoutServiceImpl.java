@@ -1,20 +1,21 @@
 package com.ylab.app.service.impl;
 
+import com.ylab.app.dbService.dao.WorkoutDao;
+import com.ylab.app.dbService.dao.impl.WorkoutDaoImpl;
 import com.ylab.app.exception.userException.UserValidationException;
 import com.ylab.app.exception.workoutException.WorkoutException;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.workout.Workout;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
+import com.ylab.app.model.workout.WorkoutType;
+import com.ylab.app.service.Audition;
 import com.ylab.app.service.UserService;
 import com.ylab.app.service.WorkoutService;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * WorkoutServiceImpl class
@@ -26,8 +27,8 @@ import java.util.stream.Collectors;
  * @since 09.04.2024
  */
 public class WorkoutServiceImpl implements WorkoutService {
-    private List<Workout> workouts = new ArrayList<>();
     private UserService userService = new UserServiceImpl();
+    private WorkoutDao workoutDao = new WorkoutDaoImpl();
 
     /**
      * Adds a workout to the system.
@@ -35,14 +36,16 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @param workout the workout to add
      * @throws WorkoutException if adding the workout fails due to an underlying issue
      */
-    public void addWorkout(Workout workout) {
+    @Override
+    public void addWorkout(User user, Workout workout) {
         if (workout == null) {
             throw new WorkoutException("Incorrect workout!");
         }
         try {
-            workouts.add(workout);
-        } catch (Exception e) {
-            throw new WorkoutException("Error adding a workout: " + e.getMessage());
+            workout.setUser(user);
+            workoutDao.insertWorkout(workout);
+        } catch (SQLException e) {
+            throw new WorkoutException("Error adding workout: " + e.getMessage());
         }
     }
 
@@ -54,21 +57,18 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @return List of workouts matching the specified date and user criteria
      * @throws WorkoutException if there is an error retrieving the workouts
      */
+    @Override
     public List<Workout> getWorkoutsOnDate(User user, LocalDateTime targetDate) {
         if (user == null) {
-            throw new UserValidationException("Invalid user");
+            throw new UserValidationException("Invalid user.");
         }
         if (targetDate == null) {
             throw new WorkoutException("Incorrect date!");
         }
         try {
-            return workouts.stream()
-                    .filter(workout -> workout.getUser().equals(user))
-                    .filter(workout -> workout.getDate().toLocalDate().equals(targetDate.toLocalDate()))
-                    .sorted(Comparator.comparing(Workout::getDate))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new WorkoutException("Error while receiving training by date: " + e.getMessage());
+            return workoutDao.findWorkoutsByUserAndDate(user, targetDate);
+        } catch (SQLException e) {
+            throw new WorkoutException("Error retrieving workouts: " + e.getMessage());
         }
     }
 
@@ -79,18 +79,13 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @param workoutId      the identifier of the workout to be updated
      * @throws WorkoutException if the workout with the specified ID does not exist or cannot be edited
      */
-    public void editWorkout(Workout updatedWorkout, Long workoutId) {
-        Workout workoutToEdit = findWorkoutById(workoutId);
-        if (workoutToEdit != null) {
-            int index = workouts.indexOf(workoutToEdit);
-            if (index != -1) {
-                workouts.set(index, updatedWorkout);
-                System.out.println("Training successfully edition.");
-            } else {
-                throw new WorkoutException("Workout with such ID not found.");
-            }
-        } else {
-            throw new WorkoutException("Workout with specified ID not found.");
+    @Override
+    public void editWorkout(User user, Workout updatedWorkout, Long workoutId) {
+        try {
+            updatedWorkout.setUser(user);
+            workoutDao.editWorkout(updatedWorkout, workoutId);
+        } catch (SQLException e) {
+            throw new WorkoutException("Failed to update workout: " + e.getMessage());
         }
     }
 
@@ -100,15 +95,15 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @param workoutId the identifier of the workout to be deleted
      * @throws WorkoutException if the workout with the specified ID does not exist or cannot be deleted
      */
+    @Override
     public void deleteWorkout(Long workoutId) {
-        Workout workoutToDelete = findWorkoutById(workoutId);
-        if (workoutToDelete != null) {
-            workouts.remove(workoutToDelete);
-            System.out.println("Training successfully removed.");
-        } else {
-            throw new WorkoutException("Workout with this ID not found or belongs to user.");
+        try {
+            workoutDao.deleteWorkout(workoutId);
+        } catch (SQLException e) {
+            throw new WorkoutException("Failed to delete workout: " + e.getMessage());
         }
     }
+
 
     /**
      * Retrieves the total calories burned by a user within a specific time period.
@@ -119,15 +114,12 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @return the total calories burned during the specified period
      * @throws WorkoutException if there is an error in calculating the calories
      */
+    @Override
     public int getCaloriesBurnedInTimePeriod(User user, LocalDateTime startDate, LocalDateTime endDate) {
         validationWorkoutUserAndDate(user, startDate, endDate);
         try {
-            return workouts.stream()
-                    .filter(workout -> workout.getUser().equals(user))
-                    .filter(workout -> workout.getDate().isAfter(startDate) && workout.getDate().isBefore(endDate))
-                    .mapToInt(Workout::getCaloriesBurned)
-                    .sum();
-        } catch (Exception e) {
+            return workoutDao.getTotalCaloriesBurnedByUser(user, startDate, endDate);
+        } catch (SQLException e) {
             throw new WorkoutException("Error in calculating burned calories for the period: " + e.getMessage());
         }
     }
@@ -136,22 +128,17 @@ public class WorkoutServiceImpl implements WorkoutService {
      * Gets statistical data of additional parameters (e.g., heart rate, steps) for all workouts of a user within a given time frame.
      *
      * @param user      the user whose stats are being queried
+     * @param type      the type of workout for which the stats are being queried
      * @param startDate the start date of the time period
      * @param endDate   the end date of the time period
-     * @return a map containing the aggregated values of different additional parameters
+     * @return a list containing the aggregated values of different additional parameters
      * @throws WorkoutException if there is an error in retrieving the additional parameters statistics
      */
-    public Map<String, Long> getAdditionalParamsStats(User user, LocalDateTime startDate, LocalDateTime endDate) {
+    @Override
+    public List<WorkoutAdditionalParams> getAdditionalParamsStats(User user, WorkoutType type, LocalDateTime startDate, LocalDateTime endDate) {
         validationWorkoutUserAndDate(user, startDate, endDate);
         try {
-            return workouts.stream()
-                    .filter(workout -> workout.getUser().equals(user))
-                    .filter(workout -> workout.getDate().isAfter(startDate) && workout.getDate().isBefore(endDate))
-                    .flatMap(workout -> workout.getParams().stream())
-                    .collect(Collectors.groupingBy(
-                            WorkoutAdditionalParams::getParams,
-                            Collectors.summingLong(WorkoutAdditionalParams::getValue)
-                    ));
+            return workoutDao.findWorkoutParamsByTypeUserAndDate(user, type, startDate, endDate);
         } catch (Exception e) {
             throw new WorkoutException("Error while obtaining statistics for additional parameters:: " + e.getMessage());
         }
@@ -164,24 +151,16 @@ public class WorkoutServiceImpl implements WorkoutService {
      * @return a list of all workouts in the system
      * @throws IllegalArgumentException if the adminUser is null or unauthorized
      */
+    @Override
     public List<Workout> getAllReadingsWorkouts(User adminUser) {
-        if (adminUser == null || !userService.checkRole(adminUser)) {
+        if (adminUser == null || !userService.hasRoleAdmin(adminUser)) {
             throw new UserValidationException("Invalid or unauthorized user");
         }
-        return workouts;
-    }
-
-    /**
-     * Finds a workout in the system by its unique ID.
-     *
-     * @param workoutId the ID of the workout to search for
-     * @return the workout found by the ID, or null if not found
-     */
-    private Workout findWorkoutById(Long workoutId) {
-        return workouts.stream()
-                .filter(w -> w.getId().equals(workoutId))
-                .findFirst()
-                .orElse(null);
+        try {
+            return workoutDao.findAllWorkoutList();
+        } catch (SQLException e) {
+            throw new WorkoutException("Not found list workouts " + e.getMessage());
+        }
     }
 
     /**
