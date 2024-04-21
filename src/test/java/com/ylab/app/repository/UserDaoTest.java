@@ -1,12 +1,11 @@
 package com.ylab.app.repository;
 
+import com.ylab.app.dbService.connection.ConnectionManager;
 import com.ylab.app.dbService.dao.impl.UserDaoImpl;
+import com.ylab.app.dbService.migration.LiquibaseMigration;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,27 +29,33 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Testcontainers
 public class UserDaoTest {
-    private Connection connection;
-
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>(getTestDatabaseVersion())
             .withDatabaseName(getTestDatabaseName())
             .withUsername(getTestUsername())
             .withPassword(getTestPassword());
 
-    @BeforeEach
-    public void setUp() throws SQLException {
-        connection = DriverManager.getConnection(
+    private static Connection testConnection;
+    private static final LiquibaseMigration liquibaseMigration = new LiquibaseMigration();
+
+    @BeforeAll
+    public static void setUp() throws SQLException {
+        testConnection = DriverManager.getConnection(
                 postgreSQLContainer.getJdbcUrl(),
                 postgreSQLContainer.getUsername(),
                 postgreSQLContainer.getPassword()
         );
-        connection.setAutoCommit(false);
-    }
-
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
+        liquibaseMigration.performLiquibaseMigration(
+                postgreSQLContainer.getJdbcUrl(),
+                postgreSQLContainer.getUsername(),
+                postgreSQLContainer.getPassword()
+        );
+        ConnectionManager.setContainerCredentials(
+                postgreSQLContainer.getJdbcUrl(),
+                postgreSQLContainer.getUsername(),
+                postgreSQLContainer.getPassword()
+        );
+        ConnectionManager.setConnectionOverride(testConnection);
     }
 
     @Test

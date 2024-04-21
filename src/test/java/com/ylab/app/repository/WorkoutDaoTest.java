@@ -1,7 +1,9 @@
 package com.ylab.app.repository;
 
+import com.ylab.app.dbService.connection.ConnectionManager;
 import com.ylab.app.dbService.dao.WorkoutDao;
 import com.ylab.app.dbService.dao.impl.WorkoutDaoImpl;
+import com.ylab.app.dbService.migration.LiquibaseMigration;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
 import com.ylab.app.model.workout.Workout;
@@ -37,27 +39,33 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Testcontainers
 public class WorkoutDaoTest {
-    private Connection connection;
-
     @Container
     public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>(getTestDatabaseVersion())
             .withDatabaseName(getTestDatabaseName())
             .withUsername(getTestUsername())
             .withPassword(getTestPassword());
 
+    private static Connection testConnection;
+    private static final LiquibaseMigration liquibaseMigration = new LiquibaseMigration();
+
     @BeforeEach
     public void setUp() throws SQLException {
-        connection = DriverManager.getConnection(
+        testConnection = DriverManager.getConnection(
                 postgreSQLContainer.getJdbcUrl(),
                 postgreSQLContainer.getUsername(),
                 postgreSQLContainer.getPassword()
         );
-        connection.setAutoCommit(false);
-    }
-
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
+        liquibaseMigration.performLiquibaseMigration(
+                postgreSQLContainer.getJdbcUrl(),
+                postgreSQLContainer.getUsername(),
+                postgreSQLContainer.getPassword()
+        );
+        ConnectionManager.setContainerCredentials(
+                postgreSQLContainer.getJdbcUrl(),
+                postgreSQLContainer.getUsername(),
+                postgreSQLContainer.getPassword()
+        );
+        ConnectionManager.setConnectionOverride(testConnection);
     }
 
     @Test

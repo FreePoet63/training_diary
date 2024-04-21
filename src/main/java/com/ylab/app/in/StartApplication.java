@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import static com.ylab.app.util.DataResultDatabase.*;
+import static com.ylab.app.util.DataResultDatabase.getPassword;
+
 /**
  * StartApplication class
  *
@@ -40,7 +43,7 @@ public class StartApplication {
      * @param args the input arguments
      */
     public static void main(String[] args) {
-        liquibaseMigration.performLiquibaseMigration();
+        liquibaseMigration.performLiquibaseMigration(getUrl() + getDatabaseName(), getUsername(), getPassword());
         while (true) {
             System.out.println("1. Register");
             System.out.println("2. Login");

@@ -13,13 +13,13 @@
     </changeSet>
 
     <changeSet id="createTableUsers" author="razlivinsky">
-        <createTable tableName="usr" schemaName="my_schema">
-            <column name="id" type="BIGINT">
+        <createTable tableName="usr" schemaName="my_schema" remarks="Stores information about users, including their credentials and roles.">
+            <column name="id" type="BIGINT" remarks="Unique identifier of the user.">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="VARCHAR(50)" />
-            <column name="password" type="VARCHAR(50)" />
-            <column name="role" type="VARCHAR(50)" />
+            <column name="name" type="VARCHAR(50)" remarks="User's name."/>
+            <column name="password" type="VARCHAR(50)" remarks="Encrypted password of the user."/>
+            <column name="role" type="VARCHAR(50)" remarks="Role assigned to the user, determining permissions and access."/>
         </createTable>
     </changeSet>
 
@@ -28,15 +28,15 @@
     </changeSet>
 
     <changeSet id="createTableWorkouts" author="razlivinsky">
-        <createTable tableName="workout" schemaName="my_schema">
-            <column name="id" type="BIGINT">
+        <createTable tableName="workout" schemaName="my_schema" remarks="Stores details of workouts recorded by users, including type and metrics.">
+            <column name="id" type="BIGINT" remarks="Unique identifier of the workout record.">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="workout_type" type="VARCHAR(255)" />
-            <column name="date" type="TIMESTAMP" />
-            <column name="duration" type="INTEGER" />
-            <column name="calories_burned" type="INTEGER" />
-            <column name="user_name" type="VARCHAR(50)">
+            <column name="workout_type" type="VARCHAR(255)" remarks="Description of the workout type (e.g., running, cycling)."/>
+            <column name="date" type="TIMESTAMP" remarks="Date and time of the workout."/>
+            <column name="duration" type="INTEGER" remarks="Total duration of the workout in minutes."/>
+            <column name="calories_burned" type="INTEGER" remarks="Approximate calories burned during the workout."/>
+            <column name="user_name" type="VARCHAR(50)" remarks="Name of the user who recorded the workout.">
             </column>
         </createTable>
     </changeSet>
@@ -46,13 +46,13 @@
     </changeSet>
 
     <changeSet id="createTableWorkoutAdditionalParams" author="razlivinsky">
-        <createTable tableName="workout_param" schemaName="my_schema">
-            <column name="id" type="BIGINT">
+        <createTable tableName="workout_param" schemaName="my_schema" remarks="Stores additional parameters for each workout record.">
+            <column name="id" type="BIGINT" remarks="Unique identifier of the workout parameter record.">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="workout_id" type="INTEGER"/>
-            <column name="param" type="VARCHAR(50)" />
-            <column name="value" type="BIGINT" >
+            <column name="workout_id" type="INTEGER" remarks="References the workout record to which this parameter belongs."/>
+            <column name="param" type="VARCHAR(50)" remarks="Name of the parameter."/>
+            <column name="value" type="BIGINT" remarks="Numeric value of the parameter.">
             </column>
         </createTable>
         <addForeignKeyConstraint baseTableSchemaName="my_schema" baseColumnNames="workout_id" baseTableName="workout_param"
@@ -65,11 +65,11 @@
     </changeSet>
 
     <changeSet id="createTableAudit" author="razlivinsky">
-        <createTable tableName="audit" schemaName="my_schema">
-            <column name="id" type="BIGINT">
+        <createTable tableName="audit" schemaName="my_schema" remarks="Stores audit information including messages and events.">
+            <column name="id" type="BIGINT" remarks="Unique identifier of the audit record.">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="message" type="VARCHAR(500)" />
+            <column name="message" type="VARCHAR(500)" remarks="Text message of the audit."/>
         </createTable>
     </changeSet>
 

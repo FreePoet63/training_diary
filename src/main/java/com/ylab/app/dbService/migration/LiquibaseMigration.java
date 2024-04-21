@@ -27,16 +27,16 @@ public class LiquibaseMigration {
     /**
      * Performs Liquibase migration on the database using the provided database connection details and schema information.
      */
-    public void performLiquibaseMigration() {
-        try (Connection conn = DriverManager.getConnection(getUrl() + getDatabaseName(), getUsername(), getPassword())) {
+    public void performLiquibaseMigration(String url, String username, String password) {
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
             try (Statement statement = conn.createStatement()) {String defaultSchemaName = getDefaultSchemaName();
                 statement.execute("CREATE SCHEMA IF NOT EXISTS " + defaultSchemaName);
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn));
                 new CommandScope(UpdateCommandStep.COMMAND_NAME)
-                        .addArgumentValue("url", getUrl() + getDatabaseName())
-                        .addArgumentValue("username", getUsername())
-                        .addArgumentValue("password", getPassword())
+                        .addArgumentValue("url", url)
+                        .addArgumentValue("username", username)
+                        .addArgumentValue("password", password)
                         .addArgumentValue("changeLogFile", "db/changelog/liquibase-changelog.xml")
                         .addArgumentValue("defaultSchemaName", defaultSchemaName)
                         .execute();
