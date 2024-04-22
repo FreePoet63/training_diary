@@ -1,0 +1,78 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet id="populateTableUsers" author="razlivinsky">
+        <insert tableName="usr" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
+            <column name="name" value="Nata"/>
+            <column name="password" value="1963"/>
+            <column name="role" value="USER"/>
+        </insert>
+        <insert tableName="usr" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
+            <column name="name" value="Olya"/>
+            <column name="password" value="1111"/>
+            <column name="role" value="USER"/>
+        </insert>
+        <insert tableName="usr" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
+            <column name="name" value="Venya"/>
+            <column name="password" value="ylab"/>
+            <column name="role" value="ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="populateTableWorkouts" author="razlivinsky">
+        <insert tableName="workout" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_id')"/>
+            <column name="workout_type" value="AEROBICS"/>
+            <column name="date" valueDate="2024-04-01 12:34:56"/>
+            <column name="duration" valueDate="300"/>
+            <column name="calories_burned" valueDate="250"/>
+            <column name="user_name" value="Nata"/>
+        </insert>
+        <insert tableName="workout" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_id')"/>
+            <column name="workout_type" value="DANCE"/>
+            <column name="date" valueDate="2024-01-30 22:16:01"/>
+            <column name="duration" valueDate="170"/>
+            <column name="calories_burned" valueDate="600"/>
+            <column name="user_name" value="Nata"/>
+        </insert>
+        <insert tableName="workout" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_id')"/>
+            <column name="workout_type" value="CARDIO"/>
+            <column name="date"  valueDate="2024-01-01 17:00:51"/>
+            <column name="duration" valueDate="233"/>
+            <column name="calories_burned" valueDate="135"/>
+            <column name="user_name" value="Olya"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="populateTableWorkoutAdditionalParams" author="razlivinsky">
+        <insert tableName="workout_param" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_param_id')"/>
+            <column name="workout_id" value="1"/>
+            <column name="param" value="jumps"/>
+            <column name="value" value="50"/>
+        </insert>
+        <insert tableName="workout_param" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_param_id')"/>
+            <column name="workout_id" value="2"/>
+            <column name="param" value="pirouette"/>
+            <column name="value" value="25"/>
+        </insert>
+        <insert tableName="workout_param" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_param_id')"/>
+            <column name="workout_id" value="2"/>
+            <column name="param" value="rotations"/>
+            <column name="value" value="34"/>
+        </insert>
+        <insert tableName="workout_param" schemaName="my_schema">
+            <column name="id" valueNumeric="nextval('my_schema.seq_workout_param_id')"/>
+            <column name="workout_id" value="3"/>
+            <column name="param" value="cycling_workout"/>
+            <column name="value" value="550"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

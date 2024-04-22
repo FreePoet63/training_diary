@@ -4,10 +4,6 @@ import com.ylab.app.model.user.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,16 +18,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
 public class Workout {
     private Long id;
+    private WorkoutType type;
     private LocalDateTime date;
     private int duration;
     private int caloriesBurned;
-    private List<WorkoutType> workoutTypes;
-    private List<WorkoutAdditionalParams> params;
     private User user;
+    private List<WorkoutAdditionalParams> params;
 }

@@ -1,29 +1,31 @@
 package com.ylab.app.service.impl;
 
+import com.ylab.app.dbService.dao.UserDao;
+import com.ylab.app.dbService.dao.impl.UserDaoImpl;
 import com.ylab.app.exception.userException.UserValidationException;
+import com.ylab.app.model.session.Session;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
 import com.ylab.app.service.UserService;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a service for managing users in the system.
  *
  * @author razlivinsky
- * @since 09.04.2024
+ * @since 24.01.2024
  */
 public class UserServiceImpl implements UserService {
-    private Map<String, User> users;
+    private UserDao userDao;
 
     /**
      * Instantiates a new user service with an empty user map.
      */
     public UserServiceImpl() {
-        this.users = new HashMap<>();
+        this.userDao = new UserDaoImpl();
     }
 
     /**
@@ -34,16 +36,18 @@ public class UserServiceImpl implements UserService {
      * @param role     the role of the user ("user" or "admin")
      * @throws UserValidationException  if the name, password, or role is invalid
      */
+    @Override
     public void registerUser(String name, String password, UserRole role) {
         validateFromUserNameAndPassword(name, password);
         if (role == null || !(role.equals(UserRole.USER) || role.equals(UserRole.ADMIN))) {
             throw new UserValidationException("Invalid role");
         }
-        if (users.containsKey(name)) {
-            throw new UserValidationException("User already exists");
+        User user = new User(name, password, UserRole.USER);
+        try {
+            userDao.insertUser(user);
+        } catch (SQLException e) {
+            throw new UserValidationException("Problem registration " + e.getMessage());
         }
-        User user = new User(name, password, role);
-        users.put(name, user);
     }
 
     /**
@@ -54,16 +58,20 @@ public class UserServiceImpl implements UserService {
      * @return the logged-in user
      * @throws UserValidationException  if the name or password is invalid
      */
+    @Override
     public User loginUser(String name, String password) {
         validateFromUserNameAndPassword(name, password);
-        if (!users.containsKey(name)) {
-            throw new UserValidationException("User does not exist");
+        try {
+            User user = userDao.findUserByNameAndPassword(name, password);
+            if (user == null) {
+                throw new UserValidationException("Invalid credentials");
+            }
+            Session session = Session.getInstance();
+            session.setUser(user);
+            return user;
+        } catch (SQLException e) {
+            throw new UserValidationException("An error occurred while logging in. Please try again. " + e.getMessage());
         }
-        User user = users.get(name);
-        if (!user.getPassword().equals(password)) {
-            throw new UserValidationException("Invalid credentials");
-        }
-        return user;
     }
 
     /**
@@ -73,7 +81,8 @@ public class UserServiceImpl implements UserService {
      * @return true if the user has admin role, false otherwise
      * @throws UserValidationException if the user is null
      */
-    public boolean checkRole(User user) {
+    @Override
+    public boolean hasRoleAdmin(User user) {
         if (user == null) {
             throw new UserValidationException("Invalid user");
         }
@@ -89,8 +98,14 @@ public class UserServiceImpl implements UserService {
      *
      * @return the list of all users
      */
+    @Override
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        try {
+            return new ArrayList<>(userDao.getAllUsers());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new UserValidationException("An error occurred while retrieving users. Please try again.");
+        }
     }
 
     /**

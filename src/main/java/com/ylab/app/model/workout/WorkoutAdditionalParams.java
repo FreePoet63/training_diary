@@ -19,10 +19,6 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
-@ToString
 public class WorkoutAdditionalParams {
     private Long id;
     private String params;

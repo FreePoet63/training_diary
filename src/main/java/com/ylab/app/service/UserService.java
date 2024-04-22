@@ -3,13 +3,14 @@ package com.ylab.app.service;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
  * An interface for managing users in the system.
  *
  * @author razlivinsky
- * @since 09.04.2024
+ * @since 28.01.2024
  */
 public interface UserService {
 
@@ -37,12 +38,12 @@ public interface UserService {
      * @param user the user to check
      * @return true if the user has admin role, false otherwise
      */
-    boolean checkRole(User user);
+    boolean hasRoleAdmin(User user);
 
     /**
      * Retrieves a list of all users in the system.
      *
      * @return the list of all users
      */
-    List<User> getAllUsers();
+    List<User> getAllUsers() throws SQLException;
 }

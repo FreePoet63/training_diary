@@ -1,0 +1,13 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: my_postgres_ylab_container
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: ylab
+      POSTGRES_DB: workout_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
