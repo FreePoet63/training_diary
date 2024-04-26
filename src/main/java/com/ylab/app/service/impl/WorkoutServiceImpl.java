@@ -1,5 +1,6 @@
 package com.ylab.app.service.impl;
 
+import com.ylab.app.aspect.LogExecution;
 import com.ylab.app.dbService.dao.WorkoutDao;
 import com.ylab.app.dbService.dao.impl.WorkoutDaoImpl;
 import com.ylab.app.exception.userException.UserValidationException;
@@ -8,9 +9,9 @@ import com.ylab.app.model.user.User;
 import com.ylab.app.model.workout.Workout;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
 import com.ylab.app.model.workout.WorkoutType;
-import com.ylab.app.service.Audition;
 import com.ylab.app.service.UserService;
 import com.ylab.app.service.WorkoutService;
+import com.ylab.app.web.mapper.WorkoutMapper;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -26,27 +27,40 @@ import java.util.List;
  * @author razlivinsky
  * @since 09.04.2024
  */
+@LogExecution
 public class WorkoutServiceImpl implements WorkoutService {
-    private UserService userService = new UserServiceImpl();
-    private WorkoutDao workoutDao = new WorkoutDaoImpl();
+    private UserService userService;
+    private WorkoutDao workoutDao;
 
     /**
-     * Adds a workout to the system.
+     * Instantiates a new Workout service.
+     */
+    public WorkoutServiceImpl() {
+        userService = new UserServiceImpl();
+        workoutDao = new WorkoutDaoImpl();
+    }
+
+    /**
+     * Adds a new workout to the system.
      *
-     * @param workout the workout to add
+     * @param user    the user adding the workout
+     * @param workout the workout to be added
+     * @return the added workout
      * @throws WorkoutException if adding the workout fails due to an underlying issue
      */
     @Override
-    public void addWorkout(User user, Workout workout) {
+    public Workout addWorkout(User user, Workout workout) {
         if (workout == null) {
             throw new WorkoutException("Incorrect workout!");
         }
         try {
             workout.setUser(user);
+            workout.setDate(LocalDateTime.now());
             workoutDao.insertWorkout(workout);
         } catch (SQLException e) {
             throw new WorkoutException("Error adding workout: " + e.getMessage());
         }
+        return workout;
     }
 
     /**
@@ -75,18 +89,21 @@ public class WorkoutServiceImpl implements WorkoutService {
     /**
      * Edits an existing workout identified by a unique workoutId.
      *
+     * @param user           the user editing the workout
      * @param updatedWorkout the updated workout details
      * @param workoutId      the identifier of the workout to be updated
+     * @return the edited workout
      * @throws WorkoutException if the workout with the specified ID does not exist or cannot be edited
      */
     @Override
-    public void editWorkout(User user, Workout updatedWorkout, Long workoutId) {
+    public Workout editWorkout(User user, Workout updatedWorkout, Long workoutId) {
         try {
             updatedWorkout.setUser(user);
             workoutDao.editWorkout(updatedWorkout, workoutId);
         } catch (SQLException e) {
             throw new WorkoutException("Failed to update workout: " + e.getMessage());
         }
+        return updatedWorkout;
     }
 
     /**
@@ -103,7 +120,6 @@ public class WorkoutServiceImpl implements WorkoutService {
             throw new WorkoutException("Failed to delete workout: " + e.getMessage());
         }
     }
-
 
     /**
      * Retrieves the total calories burned by a user within a specific time period.
@@ -160,6 +176,22 @@ public class WorkoutServiceImpl implements WorkoutService {
             return workoutDao.findAllWorkoutList();
         } catch (SQLException e) {
             throw new WorkoutException("Not found list workouts " + e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves a workout by its ID.
+     *
+     * @param workoutId the ID of the workout to retrieve
+     * @return the workout corresponding to the given ID
+     * @throws WorkoutException if an error occurs while retrieving the workout
+     */
+    @Override
+    public Workout getWorkoutById(Long workoutId) {
+        try {
+            return workoutDao.findWorkoutById(workoutId);
+        } catch (SQLException e) {
+            throw new WorkoutException("Failed to retrieve workout: " + e.getMessage());
         }
     }
 

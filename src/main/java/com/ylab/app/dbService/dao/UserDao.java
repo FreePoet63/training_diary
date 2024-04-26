@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * The UserDao interface provides methods for data access related to users in the database.
  * It includes methods for inserting a new user, finding a user by name and password, and getting a list of all users.
+ *
  * @author razlivinsky
  * @since 03.02.2024
  */
@@ -24,7 +25,7 @@ public interface UserDao {
     /**
      * Finds a user by their name and password in the database.
      *
-     * @param name the name of the user
+     * @param name     the name of the user
      * @param password the password of the user
      * @return the user with the specified name and password, or null if no such user is found
      * @throws SQLException if an error occurs while interacting with the database
@@ -38,4 +39,22 @@ public interface UserDao {
      * @throws SQLException if an error occurs while interacting with the database
      */
     public List<User> getAllUsers() throws SQLException;
+
+    /**
+     * Find user by id user.
+     *
+     * @param id the id
+     * @return the user
+     * @throws SQLException the sql exception
+     */
+    User findUserById(long id) throws SQLException;
+
+    /**
+     * Gets user by login.
+     *
+     * @param login the login
+     * @return the user by login
+     * @throws SQLException the sql exception
+     */
+    User getUserByLogin(String login) throws SQLException;
 }
