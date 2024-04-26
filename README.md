@@ -1,5 +1,5 @@
 ## Pull request link
-[Task_2](https://github.com/FreePoet63/training_diary/pull/2)
+[Task_3](https://github.com/FreePoet63/training_diary/pull/3)
 
 ## Training Diary 
 Разработайте приложение для ведения дневника тренировок, которое позволит пользователям записывать свои тренировки, просматривать их и анализировать свой прогресс в тренировках.
