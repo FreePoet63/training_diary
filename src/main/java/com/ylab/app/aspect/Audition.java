@@ -13,7 +13,7 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 @Aspect
 public class Audition {
-    @Pointcut("within(@com.ylab.app.aspect *) && execution(* * (..))")
+    @Pointcut("within(@com.ylab.app.aspect.LogExecution *) && execution(* * (..))")
     public void annotatedByAudit() {}
 
     @Around("annotatedByAudit()")
