@@ -81,5 +81,14 @@ public interface WorkoutDao {
      * @return the list of all workouts in the database
      * @throws SQLException if an SQL Exception occurs during the database operation
      */
-    public List<Workout> findAllWorkoutList() throws SQLException;
+    List<Workout> findAllWorkoutList() throws SQLException;
+
+    /**
+     * Find a workout by its ID.
+     *
+     * @param workoutId the ID of the workout to find
+     * @return the workout corresponding to the given ID
+     * @throws SQLException if a database access error occurs
+     */
+    Workout findWorkoutById(Long workoutId) throws SQLException;
 }

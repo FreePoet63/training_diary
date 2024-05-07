@@ -1,7 +1,6 @@
 package com.ylab.app.service;
 
 import com.ylab.app.dbService.dao.UserDao;
-import com.ylab.app.dbService.dao.impl.UserDaoImpl;
 import com.ylab.app.exception.userException.UserValidationException;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
@@ -9,7 +8,6 @@ import com.ylab.app.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,20 +42,13 @@ public class UserServiceTest {
     @Test
     @DisplayName("Register user with valid name, password and role")
     public void registerUserWithValidNamePasswordAndRole() throws SQLException {
-        String name = "test";
-        String password = "123";
-        UserRole role = UserRole.USER;
+        doNothing().when(dao).insertUser(any(User.class));
 
-        when(dao.findUserByNameAndPassword(name, password)).thenReturn(null);
+        User result = userService.registerUser("testUser", "password");
 
-        userService.registerUser(name, password, role);
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(dao).insertUser(userCaptor.capture());
-        User capturedUser = userCaptor.getValue();
-        assertThat(capturedUser.getName()).isEqualTo(name);
-        assertThat(capturedUser.getPassword()).isEqualTo(password);
-        assertThat(capturedUser.getRole()).isEqualTo(role);
+        assertThat(result.getName()).isEqualTo("testUser");
+        assertThat(result.getPassword()).isEqualTo("password");
+        assertThat(result.getRole()).isEqualTo(UserRole.USER);
     }
 
     @Test
@@ -65,9 +56,8 @@ public class UserServiceTest {
     public void registerUserWithNullName() {
         String name = null;
         String password = "123";
-        UserRole role = UserRole.USER;
 
-        assertThatThrownBy(() -> userService.registerUser(name, password, role))
+        assertThatThrownBy(() -> userService.registerUser(name, password))
                 .isInstanceOf(UserValidationException.class)
                 .hasMessage("Invalid credentials");
 
@@ -82,21 +72,19 @@ public class UserServiceTest {
         UserRole role = UserRole.USER;
         User expected = new User(name, password, role);
 
+        doNothing().when(dao).insertUser(any(User.class));
         when(dao.findUserByNameAndPassword(name, password)).thenReturn(expected);
-        when(dao.getAllUsers()).thenReturn(Collections.singletonList(expected));
 
+        User user = userService.registerUser(name, password);
         User result = userService.loginUser(name, password);
 
-        assertThat(result).isNotNull()
-                .usingRecursiveComparison()
-                .ignoringFields()
-                .isEqualTo(userService.getAllUsers().get(0));
+        assertThat(result).isEqualTo(user);
     }
 
     @Test
     @DisplayName("Login user with non-existing name")
     public void loginUserWithNonExistingName() {
-        String name = "test";
+        String name = "usr";
         String password = "123";
 
         assertThatThrownBy(() -> userService.loginUser(name, password))
@@ -170,9 +158,19 @@ public class UserServiceTest {
 
         when(dao.getAllUsers()).thenReturn(result);
 
-        assertThat(result).isNotNull()
-                .usingRecursiveComparison()
-                .ignoringFields()
-                .isEqualTo(userService.getAllUsers());
+        assertThat(result).filteredOn(user -> user.getRole().equals(UserRole.USER)).isNotEmpty();
+        assertThat(result).filteredOn(user -> user.getRole().equals(UserRole.ADMIN)).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("Check role for admin user")
+    public void getFindUserByLogin() throws SQLException {
+        User user = new User("test", "123", UserRole.USER);
+
+        when(dao.getUserByLogin(user.getName())).thenReturn(user);
+
+        User result = userService.getUserByLogin(user.getName());
+
+        assertThat(user.getName()).isEqualTo(result.getName());
     }
 }

@@ -12,6 +12,14 @@ public class DataResultUserQuery {
     private static final String INSERT_USER_QUERY = "insert.schema.user";
     private static final String LOGIN_QUERY = "login.user";
     private static final String LIST_USERS = "list.users";
+    /**
+     * The constant FIND_USER_BY_ID.
+     */
+    public static final String FIND_USER_BY_ID = "user.id";
+    /**
+     * The constant FIND_USER_BY_LOGIN.
+     */
+    public static final String FIND_USER_BY_LOGIN = "user.login";
 
     /**
      * Retrieves the insert user query.
@@ -38,5 +46,23 @@ public class DataResultUserQuery {
      */
     public static String getListUsersQuery() {
         return getUserQuery(LIST_USERS);
+    }
+
+    /**
+     * Gets find user by id.
+     *
+     * @return the find user by id
+     */
+    public static String getFindUserById() {
+        return getUserQuery(FIND_USER_BY_ID);
+    }
+
+    /**
+     * Gets find user by login.
+     *
+     * @return the find user by login
+     */
+    public static String getFindUserByLogin() {
+        return getUserQuery(FIND_USER_BY_LOGIN);
     }
 }

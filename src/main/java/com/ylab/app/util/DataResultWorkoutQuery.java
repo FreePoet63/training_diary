@@ -21,6 +21,7 @@ public class DataResultWorkoutQuery {
     private static final String SELECT_WORKOUT_PARAMS_ID = "select.workout.params.id";
     private static final String SELECT_WORKOUT_PARAMS_STATISTIC = "select.workout.params.statistic";
     private static final String SELECT_WORKOUT_LIST = "select.workouts";
+    private static final String SELECT_WORKOUT_BY_ID = "select.workout.id";
 
     /**
      * Retrieves the insert workout query.
@@ -128,5 +129,14 @@ public class DataResultWorkoutQuery {
      */
     public static String getSelectWorkoutList() {
         return getWorkoutQuery(SELECT_WORKOUT_LIST);
+    }
+
+    /**
+     * Retrieves the query to select a specific workout by its ID.
+     *
+     * @return the SQL query to select a workout by its ID
+     */
+    public static String getSelectWorkoutById() {
+        return getWorkoutQuery(SELECT_WORKOUT_BY_ID);
     }
 }

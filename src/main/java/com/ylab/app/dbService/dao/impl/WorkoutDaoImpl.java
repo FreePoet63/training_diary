@@ -46,6 +46,7 @@ public class WorkoutDaoImpl implements WorkoutDao {
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
                     long workoutId = rs.getLong(1);
+                    workout.setId(workoutId);
                     for (WorkoutAdditionalParams params : workout.getParams()) {
                         params.setId(workoutId);
                     }
@@ -100,6 +101,40 @@ public class WorkoutDaoImpl implements WorkoutDao {
             throw new DatabaseReadException("Invalid read " + e.getMessage());
         }
         return workouts;
+    }
+
+    /**
+     * Find a workout by its ID.
+     *
+     * @param workoutId the ID of the workout to find
+     * @return the workout corresponding to the given ID
+     * @throws SQLException if a database access error occurs
+     * @throws DatabaseReadException if there is an issue with reading the database
+     */
+    @Override
+    public Workout findWorkoutById(Long workoutId) throws SQLException {
+        Workout workout = new Workout();
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement workoutStmt = conn.prepareStatement(getSelectWorkoutById())) {
+            workoutStmt.setLong(1, workoutId);
+
+            ResultSet workoutRs = workoutStmt.executeQuery();
+            while (workoutRs.next()) {
+                String username = workoutRs.getString("user_name");
+                User user = new User(username, "", UserRole.USER);
+
+                workout.setId(workoutRs.getLong("id"));
+                workout.setType(WorkoutType.valueOf(workoutRs.getString("workout_type")));
+                workout.setDate(workoutRs.getTimestamp("date").toLocalDateTime());
+                workout.setDuration(workoutRs.getInt("duration"));
+                workout.setCaloriesBurned(workoutRs.getInt("calories_burned"));
+                workout.setUser(user);
+                workout.setParams(findParamsByWorkoutId(workout.getId()));
+            }
+        } catch (SQLException e) {
+            throw new DatabaseReadException("Invalid read " + e.getMessage());
+        }
+        return workout;
     }
 
     /**

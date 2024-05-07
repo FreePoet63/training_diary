@@ -4,6 +4,7 @@ import com.ylab.app.model.user.User;
 import com.ylab.app.model.workout.Workout;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
 import com.ylab.app.model.workout.WorkoutType;
+import com.ylab.app.web.dto.WorkoutDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,9 +24,11 @@ public interface WorkoutService {
     /**
      * Adds a workout to the system.
      *
+     * @param user    the user
      * @param workout the workout instance to add
+     * @return the workout
      */
-    void addWorkout(User user, Workout workout);
+    Workout addWorkout(User user, Workout workout);
 
     /**
      * Retrieves a list of workouts for a user on a specified date.
@@ -39,10 +42,12 @@ public interface WorkoutService {
     /**
      * Edits an existing workout identified by workoutId with the details from updatedWorkout.
      *
+     * @param user           the user
      * @param updatedWorkout the workout instance containing updated information
      * @param workoutId      the identifier of the workout to be updated
+     * @return the workout
      */
-    void editWorkout(User user, Workout updatedWorkout, Long workoutId);
+    Workout editWorkout(User user, Workout updatedWorkout, Long workoutId);
 
     /**
      * Deletes a workout identified by a unique workoutId.
@@ -65,6 +70,7 @@ public interface WorkoutService {
      * Retrieves statistics for additional workout parameters (like heart rate, steps etc.) over a specified time period.
      *
      * @param user      the user for whom the statistics are to be retrieved
+     * @param type      the type
      * @param startDate the start date of the period
      * @param endDate   the end date of the period
      * @return a list of additional parameter names and their aggregated values
@@ -77,5 +83,13 @@ public interface WorkoutService {
      * @param adminUser The administrative user requesting the workout data. Must have administrative privileges.
      * @return A list of {@code Workout} objects representing all the workouts recorded in the system.
      */
-    public List<Workout> getAllReadingsWorkouts(User adminUser);
+    List<Workout> getAllReadingsWorkouts(User adminUser);
+
+    /**
+     * Retrieves a workout by its ID.
+     *
+     * @param workoutId the ID of the workout to retrieve
+     * @return the workout corresponding to the given ID
+     */
+    Workout getWorkoutById(Long workoutId);
 }

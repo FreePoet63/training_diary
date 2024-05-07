@@ -1,5 +1,6 @@
 package com.ylab.app.service.impl;
 
+import com.ylab.app.aspect.LogExecution;
 import com.ylab.app.dbService.dao.UserDao;
 import com.ylab.app.dbService.dao.impl.UserDaoImpl;
 import com.ylab.app.exception.userException.UserValidationException;
@@ -18,36 +19,35 @@ import java.util.List;
  * @author razlivinsky
  * @since 24.01.2024
  */
+@LogExecution
 public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     /**
-     * Instantiates a new user service with an empty user map.
+     * Instantiates a new User service.
      */
     public UserServiceImpl() {
         this.userDao = new UserDaoImpl();
     }
 
     /**
-     * Registers a new user with the given name, password, and role.
+     * Registers a new user with the given name and password, assigning the role as USER.
      *
      * @param name     the name of the user
      * @param password the password for the user
-     * @param role     the role of the user ("user" or "admin")
-     * @throws UserValidationException  if the name, password, or role is invalid
+     * @return the newly registered user
+     * @throws UserValidationException if the name, password, or role is invalid
      */
     @Override
-    public void registerUser(String name, String password, UserRole role) {
+    public User registerUser(String name, String password) {
         validateFromUserNameAndPassword(name, password);
-        if (role == null || !(role.equals(UserRole.USER) || role.equals(UserRole.ADMIN))) {
-            throw new UserValidationException("Invalid role");
-        }
         User user = new User(name, password, UserRole.USER);
         try {
             userDao.insertUser(user);
         } catch (SQLException e) {
             throw new UserValidationException("Problem registration " + e.getMessage());
         }
+        return user;
     }
 
     /**
@@ -109,6 +109,38 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Finds a user in the system by their ID.
+     *
+     * @param id the ID of the user to find
+     * @return the user with the specified ID, or null if no such user is found
+     * @throws UserValidationException if the user ID is invalid
+     */
+    @Override
+    public User getUserById(long id) {
+        try {
+            return userDao.findUserById(id);
+        } catch (SQLException e) {
+            throw new UserValidationException("An error occurred while finding user by ID. " + e.getMessage());
+        }
+    }
+
+    /**
+     * Finds a user in the system by their ID.
+     *
+     * @param login the ID of the user to find
+     * @return the user with the specified ID, or null if no such user is found
+     * @throws UserValidationException if the user login is invalid
+     */
+    @Override
+    public User getUserByLogin(String login) {
+        try {
+            return userDao.getUserByLogin(login);
+        } catch (SQLException e) {
+            throw new UserValidationException("An error occurred while finding user by ID. " + e.getMessage());
+        }
+    }
+
+    /**
      * Validates the username and password for any potential issues.
      *
      * @param name     the username to be validated
@@ -116,10 +148,10 @@ public class UserServiceImpl implements UserService {
      * @throws UserValidationException if the username or password is invalid
      */
     private void validateFromUserNameAndPassword(String name, String password) {
-        if (name == null || name.isEmpty() || name.contains(" ")) {
+        if (name == null || name.isEmpty()) {
             throw new UserValidationException("Invalid credentials");
         }
-        if (password == null || password.isEmpty() || password.contains(" ")) {
+        if (password == null || password.isEmpty()) {
             throw new UserValidationException("Invalid credentials");
         }
     }
