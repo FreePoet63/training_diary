@@ -1,34 +1,30 @@
 package com.ylab.app.service.impl;
 
-import com.ylab.app.aspect.LogExecution;
 import com.ylab.app.dbService.dao.UserDao;
-import com.ylab.app.dbService.dao.impl.UserDaoImpl;
+import com.ylab.app.exception.resourceException.ResourceNotFoundException;
 import com.ylab.app.exception.userException.UserValidationException;
-import com.ylab.app.model.session.Session;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
 import com.ylab.app.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a service for managing users in the system.
+ * This service provides operations related to user registration, role validation, and user retrieval.
  *
  * @author razlivinsky
  * @since 24.01.2024
  */
-@LogExecution
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private UserDao userDao;
-
-    /**
-     * Instantiates a new User service.
-     */
-    public UserServiceImpl() {
-        this.userDao = new UserDaoImpl();
-    }
+    private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Registers a new user with the given name and password, assigning the role as USER.
@@ -36,50 +32,21 @@ public class UserServiceImpl implements UserService {
      * @param name     the name of the user
      * @param password the password for the user
      * @return the newly registered user
-     * @throws UserValidationException if the name, password, or role is invalid
+     * @throws UserValidationException if the name or password is invalid
      */
     @Override
     public User registerUser(String name, String password) {
         validateFromUserNameAndPassword(name, password);
-        User user = new User(name, password, UserRole.USER);
-        try {
-            userDao.insertUser(user);
-        } catch (SQLException e) {
-            throw new UserValidationException("Problem registration " + e.getMessage());
-        }
+        User user = new User(name, passwordEncoder.encode(password), UserRole.USER);
+        userDao.insertUser(user);
         return user;
     }
 
     /**
-     * Logs in a user with the provided name and password.
-     *
-     * @param name     the name of the user
-     * @param password the password of the user
-     * @return the logged-in user
-     * @throws UserValidationException  if the name or password is invalid
-     */
-    @Override
-    public User loginUser(String name, String password) {
-        validateFromUserNameAndPassword(name, password);
-        try {
-            User user = userDao.findUserByNameAndPassword(name, password);
-            if (user == null) {
-                throw new UserValidationException("Invalid credentials");
-            }
-            Session session = Session.getInstance();
-            session.setUser(user);
-            return user;
-        } catch (SQLException e) {
-            throw new UserValidationException("An error occurred while logging in. Please try again. " + e.getMessage());
-        }
-    }
-
-    /**
-     * Checks if the user has admin role.
+     * Checks if the user has an admin role.
      *
      * @param user the user to check
-     * @return true if the user has admin role, false otherwise
-     * @throws UserValidationException if the user is null
+     * @return true if the user has an admin role, false otherwise
      */
     @Override
     public boolean hasRoleAdmin(User user) {
@@ -100,12 +67,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getAllUsers() {
-        try {
-            return new ArrayList<>(userDao.getAllUsers());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new UserValidationException("An error occurred while retrieving users. Please try again.");
-        }
+        return new ArrayList<>(userDao.getAllUsers());
     }
 
     /**
@@ -113,31 +75,31 @@ public class UserServiceImpl implements UserService {
      *
      * @param id the ID of the user to find
      * @return the user with the specified ID, or null if no such user is found
-     * @throws UserValidationException if the user ID is invalid
+     * @throws ResourceNotFoundException if the user ID is invalid
      */
     @Override
     public User getUserById(long id) {
-        try {
-            return userDao.findUserById(id);
-        } catch (SQLException e) {
-            throw new UserValidationException("An error occurred while finding user by ID. " + e.getMessage());
+        User user = userDao.findUserById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found.");
         }
+        return user;
     }
 
     /**
-     * Finds a user in the system by their ID.
+     * Finds a user in the system by their login.
      *
-     * @param login the ID of the user to find
-     * @return the user with the specified ID, or null if no such user is found
-     * @throws UserValidationException if the user login is invalid
+     * @param login the login (username) of the user to find
+     * @return the user with the specified login, or null if no such user is found
+     * @throws ResourceNotFoundException if the user with the given login is not found
      */
     @Override
     public User getUserByLogin(String login) {
-        try {
-            return userDao.getUserByLogin(login);
-        } catch (SQLException e) {
-            throw new UserValidationException("An error occurred while finding user by ID. " + e.getMessage());
+        User user = userDao.getUserByLogin(login);
+        if (user.getName() == null) {
+            throw new ResourceNotFoundException("User not found.");
         }
+        return user;
     }
 
     /**

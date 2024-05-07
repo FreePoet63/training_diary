@@ -1,6 +1,6 @@
 package com.ylab.app.util;
 
-import static com.ylab.app.util.DataReader.getAuditQuery;
+import static com.ylab.app.util.DataReader.readAuditQuery;
 
 /**
  * DataResultAuditQuery class provides SQL queries for auditing messages.
@@ -19,7 +19,7 @@ public class DataResultAuditQuery {
      * @return The SQL query for inserting an audit message.
      */
     public static String insertAuditMessage() {
-        return getAuditQuery(INSERT_AUDIT_MESSAGE);
+        return readAuditQuery(INSERT_AUDIT_MESSAGE);
     }
 
     /**
@@ -28,6 +28,6 @@ public class DataResultAuditQuery {
      * @return The SQL query for selecting audit messages.
      */
     public static String getSelectAuditMessage() {
-        return getAuditQuery(SELECT_AUDIT_MESSAGE);
+        return readAuditQuery(SELECT_AUDIT_MESSAGE);
     }
 }

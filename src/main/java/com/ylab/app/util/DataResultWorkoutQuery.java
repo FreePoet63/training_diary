@@ -1,6 +1,6 @@
 package com.ylab.app.util;
 
-import static com.ylab.app.util.DataReader.getWorkoutQuery;
+import static com.ylab.app.util.DataReader.readWorkoutQuery;
 
 /**
  * DataResultWorkoutQuery class provides methods to retrieve workout query details from the resource bundle.
@@ -10,18 +10,18 @@ import static com.ylab.app.util.DataReader.getWorkoutQuery;
  */
 public class DataResultWorkoutQuery {
     private static final String INSERT_WORKOUT_QUERY = "insert.workout";
-    private static final String INSERT_WORKOUT_PARAMS_QUERY = "insert.workout.params";
-    private static final String WORKOUT_USER_ON_DATE_QUERY = "workout.date.query";
-    private static final String WORKOUT_PARAMS_LIST_QUERY = "workout.params.list";
-    private static final String EDIT_WORKOUT_QUERY = "edit.workout";
-    private static final String EDIT_WORKOUT_PARAMS_QUERY = "edit.workout.params";
+    private static final String INSERT_WORKOUT_PARAMS_QUERY = "insert.workout_params";
+    private static final String EDIT_WORKOUT_QUERY = "update.workout";
+    private static final String EDIT_WORKOUT_PARAMS_QUERY = "update.workout_params";
     private static final String DELETE_WORKOUT_QUERY = "delete.workout";
-    private static final String DELETE_WORKOUT_PARAMS_QUERY = "delete.workout.params";
-    private static final String SELECT_CALORIES_TOTAL = "select.calories.sum";
-    private static final String SELECT_WORKOUT_PARAMS_ID = "select.workout.params.id";
-    private static final String SELECT_WORKOUT_PARAMS_STATISTIC = "select.workout.params.statistic";
-    private static final String SELECT_WORKOUT_LIST = "select.workouts";
-    private static final String SELECT_WORKOUT_BY_ID = "select.workout.id";
+    private static final String DELETE_WORKOUT_PARAMS_QUERY = "delete.workout_params";
+    private static final String WORKOUT_USER_ON_DATE_QUERY = "select.workout_by_date";
+    private static final String WORKOUT_PARAMS_LIST_QUERY = "select.workout_params_by_id";
+    private static final String SELECT_CALORIES_TOTAL = "select.total_calories";
+    private static final String SELECT_WORKOUT_PARAMS_ID = "select.workout_params_by_criteria";
+    private static final String SELECT_WORKOUT_PARAMS_STATISTIC = "select.workout_param_statistic";
+    private static final String SELECT_WORKOUT_LIST = "select.all_workouts";
+    private static final String SELECT_WORKOUT_BY_ID = "select.workout_by_id";
 
     /**
      * Retrieves the insert workout query.
@@ -29,7 +29,7 @@ public class DataResultWorkoutQuery {
      * @return the insert workout query
      */
     public static String insertWorkoutQuery() {
-        return getWorkoutQuery(INSERT_WORKOUT_QUERY);
+        return readWorkoutQuery(INSERT_WORKOUT_QUERY);
     }
 
     /**
@@ -38,7 +38,7 @@ public class DataResultWorkoutQuery {
      * @return the insert workout params query
      */
     public static String insertWorkoutParamsQuery() {
-        return getWorkoutQuery(INSERT_WORKOUT_PARAMS_QUERY);
+        return readWorkoutQuery(INSERT_WORKOUT_PARAMS_QUERY);
     }
 
     /**
@@ -47,7 +47,7 @@ public class DataResultWorkoutQuery {
      * @return the workout user on date query
      */
     public static String getWorkoutUserOnDateQuery() {
-        return getWorkoutQuery(WORKOUT_USER_ON_DATE_QUERY);
+        return readWorkoutQuery(WORKOUT_USER_ON_DATE_QUERY);
     }
 
     /**
@@ -56,7 +56,7 @@ public class DataResultWorkoutQuery {
      * @return the workout params list query
      */
     public static String getWorkoutParamsListQuery() {
-        return getWorkoutQuery(WORKOUT_PARAMS_LIST_QUERY);
+        return readWorkoutQuery(WORKOUT_PARAMS_LIST_QUERY);
     }
 
     /**
@@ -65,7 +65,7 @@ public class DataResultWorkoutQuery {
      * @return the edit workout query
      */
     public static String editWorkoutQuery() {
-        return getWorkoutQuery(EDIT_WORKOUT_QUERY);
+        return readWorkoutQuery(EDIT_WORKOUT_QUERY);
     }
 
     /**
@@ -74,7 +74,7 @@ public class DataResultWorkoutQuery {
      * @return the edit workout params query
      */
     public static String editWorkoutParamsQuery() {
-        return getWorkoutQuery(EDIT_WORKOUT_PARAMS_QUERY);
+        return readWorkoutQuery(EDIT_WORKOUT_PARAMS_QUERY);
     }
 
     /**
@@ -83,7 +83,7 @@ public class DataResultWorkoutQuery {
      * @return the delete workout query
      */
     public static String deleteWorkoutQuery() {
-        return getWorkoutQuery(DELETE_WORKOUT_QUERY);
+        return readWorkoutQuery(DELETE_WORKOUT_QUERY);
     }
 
     /**
@@ -92,7 +92,7 @@ public class DataResultWorkoutQuery {
      * @return the delete workout params query
      */
     public static String deleteWorkoutParamsQuery() {
-        return getWorkoutQuery(DELETE_WORKOUT_PARAMS_QUERY);
+        return readWorkoutQuery(DELETE_WORKOUT_PARAMS_QUERY);
     }
 
     /**
@@ -101,7 +101,7 @@ public class DataResultWorkoutQuery {
      * @return the select calories total query
      */
     public static String getSelectCaloriesTotal() {
-        return getWorkoutQuery(SELECT_CALORIES_TOTAL);
+        return readWorkoutQuery(SELECT_CALORIES_TOTAL);
     }
 
     /**
@@ -110,7 +110,7 @@ public class DataResultWorkoutQuery {
      * @return the select workout params ID query
      */
     public static String getSelectWorkoutParamsId() {
-        return getWorkoutQuery(SELECT_WORKOUT_PARAMS_ID);
+        return readWorkoutQuery(SELECT_WORKOUT_PARAMS_ID);
     }
 
     /**
@@ -119,7 +119,7 @@ public class DataResultWorkoutQuery {
      * @return the select workout params statistic query
      */
     public static String getSelectWorkoutParamsStatistic() {
-        return getWorkoutQuery(SELECT_WORKOUT_PARAMS_STATISTIC);
+        return readWorkoutQuery(SELECT_WORKOUT_PARAMS_STATISTIC);
     }
 
     /**
@@ -128,7 +128,7 @@ public class DataResultWorkoutQuery {
      * @return the select workout list query
      */
     public static String getSelectWorkoutList() {
-        return getWorkoutQuery(SELECT_WORKOUT_LIST);
+        return readWorkoutQuery(SELECT_WORKOUT_LIST);
     }
 
     /**
@@ -137,6 +137,6 @@ public class DataResultWorkoutQuery {
      * @return the SQL query to select a workout by its ID
      */
     public static String getSelectWorkoutById() {
-        return getWorkoutQuery(SELECT_WORKOUT_BY_ID);
+        return readWorkoutQuery(SELECT_WORKOUT_BY_ID);
     }
 }

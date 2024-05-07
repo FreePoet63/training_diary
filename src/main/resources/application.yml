@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/workout_db
+    username: user
+    password: ylab
+  liquibase:
+    change-log: classpath:db/changelog/liquibase-changelog.xml
+    defaultSchema: my_custom_schema
+  jackson:
+    date-format: 'yyyy-MM-dd HH:mm'
+    time-zone: 'UTC'
+security:
+  jwt:
+    secret: bmRmYnZ2amZudmp2anZqdm12YmR4aHhoZ2dzY3NseHBjb2NpdWRjZ3N2c2J4Y21ja0hGSEZIQkNCRkJGSEhOQ05DTkNNQ0tY
+    access: 3600000
+    refresh: 2592000000
+springdoc:
+  override-with-generic-response: false
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springdoc: DEBUG

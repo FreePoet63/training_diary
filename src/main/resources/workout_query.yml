@@ -1,0 +1,50 @@
+insert:
+  workout: >
+    INSERT INTO my_schema.workout (id, workout_type, date, duration, calories_burned, user_name)
+    VALUES (nextval('my_schema.seq_workout_id'), ?, ?, ?, ?, ?)
+  workout_params: >
+    INSERT INTO my_schema.workout_param (id, workout_id, param, value)
+    VALUES (nextval('my_schema.seq_workout_param_id'), ?, ?, ?)
+
+select:
+  workout_by_date: >
+    SELECT * FROM my_schema.workout
+    WHERE user_name = ? AND DATE(date) = DATE(?)
+  workout_params_by_id: >
+    SELECT wp.workout_id, wp.param, wp.value
+    FROM my_schema.workout w
+    INNER JOIN my_schema.workout_param wp ON w.id = wp.workout_id
+    WHERE w.id = ?
+  total_calories: >
+    SELECT SUM(calories_burned) AS TotalCalories
+    FROM my_schema.workout
+    WHERE user_name = ? AND date BETWEEN ? AND ?
+  workout_params_by_criteria: >
+    SELECT id FROM my_schema.workout
+    WHERE workout_type = ? AND user_name = ? AND date BETWEEN ? AND ?
+  workout_param_statistic: >
+    SELECT * FROM my_schema.workout_param
+    WHERE workout_id = ?
+  all_workouts: >
+    SELECT * FROM my_schema.workout
+  workout_by_id: >
+    SELECT * FROM my_schema.workout
+    WHERE id = ?
+
+update:
+  workout: >
+    UPDATE my_schema.workout
+    SET workout_type = ?, date = ?, duration = ?, calories_burned = ?, user_name = ?
+    WHERE id = ?
+  workout_params: >
+    UPDATE my_schema.workout_param
+    SET param = ?, value = ?
+    WHERE workout_id = ?
+
+delete:
+  workout: >
+    DELETE FROM my_schema.workout
+    WHERE id = ?
+  workout_params: >
+    DELETE FROM my_schema.workout_param
+    WHERE workout_id = ?

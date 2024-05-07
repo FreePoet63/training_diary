@@ -1,14 +1,15 @@
 package com.ylab.app.aspect;
 
 import com.ylab.app.dbService.dao.AuditDao;
-import com.ylab.app.dbService.dao.impl.AuditDaoImpl;
 import com.ylab.app.model.audit.AuditModel;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.stereotype.Component;
 
 /**
  * DetailedLoggingAspect class
@@ -21,15 +22,18 @@ import org.aspectj.lang.reflect.MethodSignature;
  * @since 26.04.2024
  */
 @Aspect
+@Component
+@RequiredArgsConstructor
 public class DetailedLoggingAspect {
-    private AuditDao auditDao = new AuditDaoImpl();
+    private final AuditDao auditDao;
+
 
     /**
      * Intercepts the method execution before it begins to log the input parameters.
      *
      * @param joinPoint the join point at which this advice is being executed
      */
-    @Before("execution(* com.ylab.app..*(..))")
+    @Before("execution(* com.ylab.app.service..*(..))")
     public void beforeMethod(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String methodName = signature.getName();
@@ -46,6 +50,7 @@ public class DetailedLoggingAspect {
         String begin = ("BEGIN: " + methodName + "(" + params + ")");
         AuditModel audit = new AuditModel(begin);
         auditDao.sendMessage(audit);
+        System.out.println(auditDao.getMessage());
     }
 
     /**
@@ -55,7 +60,7 @@ public class DetailedLoggingAspect {
      * @param result the result returned by the intercepted method
      */
     @AfterReturning(
-            pointcut = "execution(* com.ylab.app..*(..))",
+            pointcut = "execution(* com.ylab.app.service..*(..))",
             returning = "result"
     )
     public void afterReturningMethod(JoinPoint joinPoint, Object result) {
@@ -63,6 +68,7 @@ public class DetailedLoggingAspect {
         String end = ("SUCCESS: " + methodName + ", RESULT: " + result);
         AuditModel audit = new AuditModel(end);
         auditDao.sendMessage(audit);
+        System.out.println(auditDao.getMessage());
     }
 
     /**
@@ -72,7 +78,7 @@ public class DetailedLoggingAspect {
      * @param error the exception thrown by the intercepted method
      */
     @AfterThrowing(
-            pointcut = "execution(* com.ylab.app..*(..))",
+            pointcut = "execution(* com.ylab.app.service..*(..))",
             throwing = "error"
     )
     public void afterThrowingMethod(JoinPoint joinPoint, Throwable error) {
@@ -80,5 +86,6 @@ public class DetailedLoggingAspect {
         String endException = ("FAILURE: " + methodName + ", ERROR: " + error.getMessage());
         AuditModel audit = new AuditModel(endException);
         auditDao.sendMessage(audit);
+        System.out.println(auditDao.getMessage());
     }
 }

@@ -3,9 +3,8 @@ package com.ylab.app.web.mapper;
 import com.ylab.app.model.workout.Workout;
 import com.ylab.app.web.dto.WorkoutDto;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * Interface for mapping workout entities to workout data transfer objects (DTO) and vice versa, using MapStruct.
@@ -14,9 +13,8 @@ import org.mapstruct.factory.Mappers;
  * @author razlivinsky
  * @since 18.04.2024
  */
-@Mapper(uses = {WorkoutAdditionalParamsMapper.class})
+@Mapper(componentModel = "spring", uses = {WorkoutAdditionalParamsMapper.class})
 public interface WorkoutMapper {
-    WorkoutMapper INSTANCE = Mappers.getMapper(WorkoutMapper.class);
 
     /**
      * Maps a workout entity to a workout data transfer object (DTO).
@@ -24,16 +22,15 @@ public interface WorkoutMapper {
      * @param workout the workout entity to map
      * @return the workout data transfer object
      */
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "type", source = "type"),
-            @Mapping(target = "date", source = "date"),
-            @Mapping(target = "duration", source = "duration"),
-            @Mapping(target = "caloriesBurned", source = "caloriesBurned"),
-            @Mapping(target = "user", source = "user"),
-            @Mapping(target = "params", source = "params")
-    })
     WorkoutDto workoutToWorkoutDto(Workout workout);
+
+    /**
+     * Converts a list of Workout entities to a list of WorkoutDto objects.
+     *
+     * @param list the list of Workout entities to be converted
+     * @return the list of WorkoutDto objects
+     */
+    List<WorkoutDto> listWorkoutToWorkoutDto(List<Workout> list);
 
     /**
      * Maps a workout data transfer object (DTO) to a workout entity.
@@ -41,14 +38,5 @@ public interface WorkoutMapper {
      * @param workoutDto the workout data transfer object to map
      * @return the workout entity
      */
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "type", source = "type"),
-            @Mapping(target = "date", source = "date"),
-            @Mapping(target = "duration", source = "duration"),
-            @Mapping(target = "caloriesBurned", source = "caloriesBurned"),
-            @Mapping(target = "user", source = "user"),
-            @Mapping(target = "params", source = "params")
-    })
     Workout workoutDtoToWorkout(WorkoutDto workoutDto);
 }

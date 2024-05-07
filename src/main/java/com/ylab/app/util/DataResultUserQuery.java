@@ -1,6 +1,6 @@
 package com.ylab.app.util;
 
-import static com.ylab.app.util.DataReader.getUserQuery;
+import static com.ylab.app.util.DataReader.readUserQuery;
 
 /**
  * DataResultUserQuery class provides methods to retrieve user query details from the resource bundle.
@@ -12,13 +12,7 @@ public class DataResultUserQuery {
     private static final String INSERT_USER_QUERY = "insert.schema.user";
     private static final String LOGIN_QUERY = "login.user";
     private static final String LIST_USERS = "list.users";
-    /**
-     * The constant FIND_USER_BY_ID.
-     */
     public static final String FIND_USER_BY_ID = "user.id";
-    /**
-     * The constant FIND_USER_BY_LOGIN.
-     */
     public static final String FIND_USER_BY_LOGIN = "user.login";
 
     /**
@@ -27,7 +21,7 @@ public class DataResultUserQuery {
      * @return the insert user query
      */
     public static String insertUserQuery() {
-        return getUserQuery(INSERT_USER_QUERY);
+        return readUserQuery(INSERT_USER_QUERY);
     }
 
     /**
@@ -36,7 +30,7 @@ public class DataResultUserQuery {
      * @return the login query
      */
     public static String getLoginQuery() {
-        return getUserQuery(LOGIN_QUERY);
+        return readUserQuery(LOGIN_QUERY);
     }
 
     /**
@@ -45,7 +39,7 @@ public class DataResultUserQuery {
      * @return the list users query
      */
     public static String getListUsersQuery() {
-        return getUserQuery(LIST_USERS);
+        return readUserQuery(LIST_USERS);
     }
 
     /**
@@ -54,7 +48,7 @@ public class DataResultUserQuery {
      * @return the find user by id
      */
     public static String getFindUserById() {
-        return getUserQuery(FIND_USER_BY_ID);
+        return readUserQuery(FIND_USER_BY_ID);
     }
 
     /**
@@ -63,6 +57,6 @@ public class DataResultUserQuery {
      * @return the find user by login
      */
     public static String getFindUserByLogin() {
-        return getUserQuery(FIND_USER_BY_LOGIN);
+        return readUserQuery(FIND_USER_BY_LOGIN);
     }
 }

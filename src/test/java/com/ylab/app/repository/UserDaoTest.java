@@ -1,125 +1,75 @@
 package com.ylab.app.repository;
 
-import com.ylab.app.dbService.connection.ConnectionManager;
 import com.ylab.app.dbService.dao.impl.UserDaoImpl;
-import com.ylab.app.dbService.migration.LiquibaseMigration;
+import com.ylab.app.dbService.mappers.UserRowMapper;
 import com.ylab.app.model.user.User;
-import com.ylab.app.model.user.UserRole;
-import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.ylab.app.util.TestDataResult.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 /**
  * UserDaoTest class represents the test suite for testing the functionality of the User DAO (Data Access Object) class.
- * It utilizes Testcontainers for Docker-based integration testing.
  *
  * @author razlivinsky
  * @since 15.04.2024
  */
-@Testcontainers
-public class UserDaoTest {
-    @Container
-    public static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>(getTestDatabaseVersion())
-            .withDatabaseName(getTestDatabaseName())
-            .withUsername(getTestUsername())
-            .withPassword(getTestPassword());
+@ExtendWith(MockitoExtension.class)
+class UserDaoTest {
 
-    private static Connection testConnection;
-    private static final LiquibaseMigration liquibaseMigration = new LiquibaseMigration();
+    @Mock
+    private JdbcTemplate jdbcTemplate;
 
-    @BeforeAll
-    public static void setUp() throws SQLException {
-        testConnection = DriverManager.getConnection(
-                postgreSQLContainer.getJdbcUrl(),
-                postgreSQLContainer.getUsername(),
-                postgreSQLContainer.getPassword()
-        );
-        liquibaseMigration.performLiquibaseMigration(
-                postgreSQLContainer.getJdbcUrl(),
-                postgreSQLContainer.getUsername(),
-                postgreSQLContainer.getPassword()
-        );
-        ConnectionManager.setContainerCredentials(
-                postgreSQLContainer.getJdbcUrl(),
-                postgreSQLContainer.getUsername(),
-                postgreSQLContainer.getPassword()
-        );
-        ConnectionManager.setConnectionOverride(testConnection);
-    }
+    @Mock
+    private UserRowMapper userRowMapper;
+
+    @InjectMocks
+    private UserDaoImpl userDao;
 
     @Test
-    @DisplayName("Insert user into database")
-    public void testInsertUser() throws SQLException {
-        User user = new User("Alice", "1234", UserRole.USER);
-        UserDaoImpl userDao = new UserDaoImpl();
-
-        userDao.insertUser(user);
-
-        User retrievedUser = userDao.findUserByNameAndPassword("Alice", "1234");
-        assertEquals(user.getName(), retrievedUser.getName());
-        assertEquals(user.getPassword(), retrievedUser.getPassword());
-        assertEquals(user.getRole(), retrievedUser.getRole());
-    }
-
-    @Test
-    @DisplayName("Find user by name and password with wrong credentials")
-    public void testFindUserByNameAndPasswordWithWrongCredentials() throws SQLException {
-        String wrongName = "Jim";
-        String wrongPassword = "1111";
-        UserDaoImpl userDao = new UserDaoImpl();
-        User result = userDao.findUserByNameAndPassword(wrongName, wrongPassword);
-        assertNull(result);
-    }
-
-    @Test
-    @DisplayName("Find user by name and password with valid credentials")
-    public void testFindUserByNameAndPasswordWithValidCredentials() throws SQLException {
-        String validName = "Alice";
-        String validPassword = "1234";
-        UserRole validRole = UserRole.USER;
-        UserDaoImpl userDao = new UserDaoImpl();
-
-        User expectedUser = new User(validName, validPassword, validRole);
-        userDao.insertUser(expectedUser);
-
-        User result = userDao.findUserByNameAndPassword(validName, validPassword);
-
-        assertNotNull(result);
-        assertEquals(expectedUser.getName(), result.getName());
-        assertEquals(expectedUser.getPassword(), result.getPassword());
-        assertEquals(expectedUser.getRole(), result.getRole());
-    }
-
-    @Test
-    @DisplayName("Get all users with non-empty database")
-    public void testGetAllUsersWithNonEmptyDatabase() throws SQLException {
-        User user1 = new User("Alice", "1234", UserRole.USER);
-        User user2 = new User("Bob", "4321", UserRole.ADMIN);
-        UserDaoImpl userDao = new UserDaoImpl();
-
-        userDao.insertUser(user1);
-        userDao.insertUser(user2);
+    @DisplayName("Get all users should return list of users from the database")
+    void getAllUsers_ShouldReturnListOfUsers() {
+        List<User> userList = new ArrayList<>();
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenReturn(userList);
 
         List<User> result = userDao.getAllUsers();
 
-        assertFalse(result.isEmpty());
-        assertThat(result)
-                .isNotEmpty()
-                .extracting(User::getName, User::getPassword, User::getRole)
-                .containsAnyOf(
-                        tuple("Alice", "1234", UserRole.USER),
-                        tuple("Bob", "4321", UserRole.ADMIN)
-                );
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(userList);
+    }
+
+    @Test
+    @DisplayName("Find user by id should return user or null")
+    void findUserById_ShouldReturnUserOrNull() {
+        long userId = 1L;
+        User user = new User();
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(userId))).thenReturn(user);
+
+        User result = userDao.findUserById(userId);
+
+        assertThat(result).isEqualTo(user);
+    }
+
+    @Test
+    @DisplayName("Get user by login should return user or null")
+    void getUserByLogin_ShouldReturnUserOrNull() {
+        String login = "testUser";
+        User user = new User();
+        when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), eq(login))).thenReturn(user);
+
+        User result = userDao.getUserByLogin(login);
+
+        assertThat(result).isEqualTo(user);
     }
 }

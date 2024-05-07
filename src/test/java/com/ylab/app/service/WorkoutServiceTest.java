@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -102,29 +103,21 @@ public class WorkoutServiceTest {
     }
 
     @Test
-    @DisplayName("Getting workouts on a date should throw an exception if the user is null")
-    void getWorkoutsOnDate_ShouldThrowException_WhenUserIsNull() {
-        User nullUser = null;
-
-        assertThatThrownBy(() -> workoutService.getWorkoutsOnDate(nullUser, date))
-                .isInstanceOf(UserValidationException.class)
-                .hasMessageContaining("Invalid user.");
-    }
-
-    @Test
     @DisplayName("Editing a workout should be successful")
     void editWorkout_ShouldEditWorkout() throws SQLException {
-        doNothing().when(workoutDao).editWorkout(any(Workout.class), eq(workoutId));
+        when(workoutDao.findWorkoutById(workoutId)).thenReturn(workout);
+        Workout updatedWorkout = new Workout();
+        Workout result = workoutService.editWorkout(user, updatedWorkout, workoutId);
 
-        workoutService.editWorkout(user, workout, workoutId);
+        verify(workoutDao).editWorkout(updatedWorkout, workoutId);
 
-        verify(workoutDao).editWorkout(workout, workoutId);
+        assertEquals(updatedWorkout, result);
     }
 
     @Test
     @DisplayName("Deleting a workout should be successful")
     void deleteWorkout_ShouldDeleteWorkout() throws SQLException {
-        doNothing().when(workoutDao).deleteWorkout(workoutId);
+        when(workoutDao.findWorkoutById(workoutId)).thenReturn(workout);
 
         workoutService.deleteWorkout(workoutId);
 

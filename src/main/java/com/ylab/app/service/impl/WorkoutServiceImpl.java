@@ -1,8 +1,7 @@
 package com.ylab.app.service.impl;
 
-import com.ylab.app.aspect.LogExecution;
 import com.ylab.app.dbService.dao.WorkoutDao;
-import com.ylab.app.dbService.dao.impl.WorkoutDaoImpl;
+import com.ylab.app.exception.resourceException.ResourceNotFoundException;
 import com.ylab.app.exception.userException.UserValidationException;
 import com.ylab.app.exception.workoutException.WorkoutException;
 import com.ylab.app.model.user.User;
@@ -11,10 +10,10 @@ import com.ylab.app.model.workout.WorkoutAdditionalParams;
 import com.ylab.app.model.workout.WorkoutType;
 import com.ylab.app.service.UserService;
 import com.ylab.app.service.WorkoutService;
-import com.ylab.app.web.mapper.WorkoutMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,23 +26,16 @@ import java.util.List;
  * @author razlivinsky
  * @since 09.04.2024
  */
-@LogExecution
+@Service
+@RequiredArgsConstructor
 public class WorkoutServiceImpl implements WorkoutService {
-    private UserService userService;
-    private WorkoutDao workoutDao;
-
-    /**
-     * Instantiates a new Workout service.
-     */
-    public WorkoutServiceImpl() {
-        userService = new UserServiceImpl();
-        workoutDao = new WorkoutDaoImpl();
-    }
+    private final UserService userService;
+    private final WorkoutDao workoutDao;
 
     /**
      * Adds a new workout to the system.
      *
-     * @param user    the user adding the workout
+     * @param user    the user associated with the workout
      * @param workout the workout to be added
      * @return the added workout
      * @throws WorkoutException if adding the workout fails due to an underlying issue
@@ -53,13 +45,8 @@ public class WorkoutServiceImpl implements WorkoutService {
         if (workout == null) {
             throw new WorkoutException("Incorrect workout!");
         }
-        try {
-            workout.setUser(user);
-            workout.setDate(LocalDateTime.now());
-            workoutDao.insertWorkout(workout);
-        } catch (SQLException e) {
-            throw new WorkoutException("Error adding workout: " + e.getMessage());
-        }
+        workout.setUser(user);
+        workoutDao.insertWorkout(workout);
         return workout;
     }
 
@@ -73,17 +60,10 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Override
     public List<Workout> getWorkoutsOnDate(User user, LocalDateTime targetDate) {
-        if (user == null) {
-            throw new UserValidationException("Invalid user.");
-        }
         if (targetDate == null) {
             throw new WorkoutException("Incorrect date!");
         }
-        try {
-            return workoutDao.findWorkoutsByUserAndDate(user, targetDate);
-        } catch (SQLException e) {
-            throw new WorkoutException("Error retrieving workouts: " + e.getMessage());
-        }
+        return workoutDao.findWorkoutsByUserAndDate(user, targetDate);
     }
 
     /**
@@ -97,12 +77,12 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Override
     public Workout editWorkout(User user, Workout updatedWorkout, Long workoutId) {
-        try {
-            updatedWorkout.setUser(user);
-            workoutDao.editWorkout(updatedWorkout, workoutId);
-        } catch (SQLException e) {
-            throw new WorkoutException("Failed to update workout: " + e.getMessage());
+        Workout existingWorkout = workoutDao.findWorkoutById(workoutId);
+        if (existingWorkout == null) {
+            throw new ResourceNotFoundException("Resource not found");
         }
+        updatedWorkout.setUser(user);
+        workoutDao.editWorkout(updatedWorkout, workoutId);
         return updatedWorkout;
     }
 
@@ -114,11 +94,12 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Override
     public void deleteWorkout(Long workoutId) {
-        try {
-            workoutDao.deleteWorkout(workoutId);
-        } catch (SQLException e) {
-            throw new WorkoutException("Failed to delete workout: " + e.getMessage());
+        Workout existingWorkout = workoutDao.findWorkoutById(workoutId);
+        if (existingWorkout == null) {
+            throw new ResourceNotFoundException("Resource not found");
         }
+        workoutDao.deleteWorkout(workoutId);
+
     }
 
     /**
@@ -132,12 +113,8 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Override
     public int getCaloriesBurnedInTimePeriod(User user, LocalDateTime startDate, LocalDateTime endDate) {
-        validationWorkoutUserAndDate(user, startDate, endDate);
-        try {
-            return workoutDao.getTotalCaloriesBurnedByUser(user, startDate, endDate);
-        } catch (SQLException e) {
-            throw new WorkoutException("Error in calculating burned calories for the period: " + e.getMessage());
-        }
+        validationWorkoutUserAndDate(startDate, endDate);
+        return workoutDao.getTotalCaloriesBurnedByUser(user, startDate, endDate);
     }
 
     /**
@@ -152,12 +129,8 @@ public class WorkoutServiceImpl implements WorkoutService {
      */
     @Override
     public List<WorkoutAdditionalParams> getAdditionalParamsStats(User user, WorkoutType type, LocalDateTime startDate, LocalDateTime endDate) {
-        validationWorkoutUserAndDate(user, startDate, endDate);
-        try {
-            return workoutDao.findWorkoutParamsByTypeUserAndDate(user, type, startDate, endDate);
-        } catch (Exception e) {
-            throw new WorkoutException("Error while obtaining statistics for additional parameters:: " + e.getMessage());
-        }
+        validationWorkoutUserAndDate(startDate, endDate);
+        return workoutDao.findWorkoutParamsByTypeUserAndDate(user, type, startDate, endDate);
     }
 
     /**
@@ -165,18 +138,14 @@ public class WorkoutServiceImpl implements WorkoutService {
      *
      * @param adminUser the admin user requesting the workouts
      * @return a list of all workouts in the system
-     * @throws IllegalArgumentException if the adminUser is null or unauthorized
+     * @throws UserValidationException if the adminUser is null or unauthorized
      */
     @Override
     public List<Workout> getAllReadingsWorkouts(User adminUser) {
         if (adminUser == null || !userService.hasRoleAdmin(adminUser)) {
             throw new UserValidationException("Invalid or unauthorized user");
         }
-        try {
-            return workoutDao.findAllWorkoutList();
-        } catch (SQLException e) {
-            throw new WorkoutException("Not found list workouts " + e.getMessage());
-        }
+        return workoutDao.findAllWorkoutList();
     }
 
     /**
@@ -184,15 +153,15 @@ public class WorkoutServiceImpl implements WorkoutService {
      *
      * @param workoutId the ID of the workout to retrieve
      * @return the workout corresponding to the given ID
-     * @throws WorkoutException if an error occurs while retrieving the workout
+     * @throws ResourceNotFoundException if the workout with the specified ID is not found
      */
     @Override
     public Workout getWorkoutById(Long workoutId) {
-        try {
-            return workoutDao.findWorkoutById(workoutId);
-        } catch (SQLException e) {
-            throw new WorkoutException("Failed to retrieve workout: " + e.getMessage());
+        Workout existingWorkout = workoutDao.findWorkoutById(workoutId);
+        if (existingWorkout == null) {
+            throw new ResourceNotFoundException("Resource not found");
         }
+        return existingWorkout;
     }
 
     /**
@@ -200,16 +169,11 @@ public class WorkoutServiceImpl implements WorkoutService {
      *
      * This method ensures that the user object is not null and that both the start and end dates are provided.
      *
-     * @param user The user object to validate.
      * @param startDate The start date of the period to validate.
      * @param endDate The end date of the period to validate.
-     * @throws UserValidationException if the user object is null.
      * @throws WorkoutException if either the start or end date is null.
      */
-    private void validationWorkoutUserAndDate(User user, Serializable startDate, Serializable endDate) {
-        if(user == null) {
-            throw new UserValidationException("incorrect user!");
-        }
+    private void validationWorkoutUserAndDate(Serializable startDate, Serializable endDate) {
         if (startDate == null || endDate == null) {
             throw new WorkoutException("Incorrect date!");
         }
