@@ -13,9 +13,10 @@ Endpoints:
 User:
 
 POST http://localhost::8099/users
-
 {
+   
    "name": "name",
+
    "password": "password"
 }
 
