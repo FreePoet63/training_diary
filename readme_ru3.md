@@ -10,7 +10,7 @@ Audit логгирует все методы Servlets и Services.
 
 Endpoints:
 
-User:
+### User:
 
 POST http://localhost::8099/users
 
@@ -25,7 +25,7 @@ GET http://localhost::8099/users/{id}
 
 GET http://localhost::8099/users
 
-Training Diary:
+### Training Diary:
 
 Только для авторизированных пользователей, для отправки запросов нужна авторизация.
 
@@ -33,17 +33,17 @@ POST: http://localhost::8099/workout
 
 example body:
 
-{    
-"type": "HIGH_INTENSITY_INTERVAL_TRAINING",
-"duration": 200,
-"caloriesBurned": 450,
-"params": [
-{
-"params": "Interval frequency",
-"value": 15
-}
-]
-}
+        {    
+            "type": "HIGH_INTENSITY_INTERVAL_TRAINING",
+            "duration": 200,
+            "caloriesBurned": 450,
+            "params": [
+                        {
+                          "params": "Interval frequency",
+                          "value": 15
+                         }
+                      ]
+        }
 
 PUT: http://localhost::8099/workout/{id}
 
