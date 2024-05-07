@@ -1,4 +1,4 @@
-TASK 2
+## TASK 2
 Краткое описание
 В проект добавлены aspectj, servlets.
 
@@ -15,8 +15,8 @@ User:
 POST http://localhost::8099/users
 
 {
-"name": "name",
-"password": "password"
+   "name": "name",
+   "password": "password"
 }
 
 GET http://localhost::8099/users/login?name={name}&password={password}
