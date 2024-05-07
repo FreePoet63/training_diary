@@ -8,9 +8,9 @@ Audit логгирует все методы Servlets и Services.
 
 Для запуска используется Jetty - сервер. Приложение запускается из класса StartApplication, запускает сервер, и можно отправлять endpoints используя API - инструменты, например POSTMAN.
 
-Endpoints:
+### Endpoints:
 
-### User:
+#### User:
 
 POST http://localhost::8099/users
 
@@ -25,7 +25,7 @@ GET http://localhost::8099/users/{id}
 
 GET http://localhost::8099/users
 
-### Training Diary:
+#### Training Diary:
 
 Только для авторизированных пользователей, для отправки запросов нужна авторизация.
 
@@ -49,18 +49,18 @@ PUT: http://localhost::8099/workout/{id}
 
 example body:
 
-{    
-"type": "HIGH_INTENSITY_INTERVAL_TRAINING",
-"date": "2024-04-25T19:50:24.496878",
-"duration": 210,
-"caloriesBurned": 450,
-"params": [
-{
-"params": "Interval frequency",
-"value": 20
-}
-]
-}
+        { 
+            "type": "HIGH_INTENSITY_INTERVAL_TRAINING",
+            "duration": 200,
+            "caloriesBurned": 450,
+            "params": [
+                        {
+                          "params": "Interval frequency",
+                          "value": 15
+                         }
+                      ]
+        }
+
 
 DELETE http://localhost::8099/workout/{id}
 
