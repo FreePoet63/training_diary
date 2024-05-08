@@ -22,7 +22,6 @@ import org.hibernate.validator.constraints.Length;
 @Schema(description = "User DTO")
 public class UserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @NotNull(message = "Id must be not null.")
     private Long id;
 
     @Schema(description = "User name", example = "Y_lab")
@@ -36,6 +35,5 @@ public class UserDto {
     private String password;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @NotNull(message = "User role must be not null.")
     private UserRole role;
 }
