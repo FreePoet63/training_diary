@@ -1,9 +1,13 @@
 package com.ylab.app.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ylab.app.model.user.UserRole;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 /**
  * UserDto class represents a Data Transfer Object for user-related information.
@@ -15,9 +19,21 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "User DTO")
 public class UserDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+
+    @Schema(description = "User name", example = "ylab")
+    @NotNull(message = "Name must be not null.")
+    @Length(max = 255, message = "Name length must be smaller than 255 symbols.")
     private String name;
+
+    @Schema(description = "User password", example = "ylab")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotNull(message = "Password must be not null.")
     private String password;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private UserRole role;
 }

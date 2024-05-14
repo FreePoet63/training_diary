@@ -2,7 +2,6 @@ package com.ylab.app.dbService.dao;
 
 import com.ylab.app.model.user.User;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -18,43 +17,29 @@ public interface UserDao {
      * Inserts the provided user into the database.
      *
      * @param user the user object to be inserted
-     * @throws SQLException if an error occurs while interacting with the database
      */
-    public void insertUser(User user) throws SQLException;
-
-    /**
-     * Finds a user by their name and password in the database.
-     *
-     * @param name     the name of the user
-     * @param password the password of the user
-     * @return the user with the specified name and password, or null if no such user is found
-     * @throws SQLException if an error occurs while interacting with the database
-     */
-    public User findUserByNameAndPassword(String name, String password) throws SQLException;
+    public void insertUser(User user);
 
     /**
      * Retrieves a list of all users from the database.
      *
      * @return a list of all users in the database
-     * @throws SQLException if an error occurs while interacting with the database
      */
-    public List<User> getAllUsers() throws SQLException;
+    public List<User> getAllUsers();
 
     /**
-     * Find user by id user.
+     * Find a user in the database by their ID.
      *
-     * @param id the id
-     * @return the user
-     * @throws SQLException the sql exception
+     * @param id the ID of the user to find
+     * @return the user with the specified ID, or null if no such user is found
      */
-    User findUserById(long id) throws SQLException;
+    User findUserById(long id);
 
     /**
-     * Gets user by login.
+     * Retrieves a user from the database based on their login.
      *
-     * @param login the login
-     * @return the user by login
-     * @throws SQLException the sql exception
+     * @param login the login (username) of the user to find
+     * @return the user with the specified login, or null if no such user is found
      */
-    User getUserByLogin(String login) throws SQLException;
+    User getUserByLogin(String login);
 }

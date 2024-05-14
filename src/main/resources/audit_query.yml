@@ -1,0 +1,9 @@
+insert:
+  audit: >
+    INSERT INTO my_schema.audit (id, message)
+    VALUES (nextval('my_schema.seq_audit_id'), ?)
+
+select:
+  audit: >
+    SELECT *
+    FROM my_schema.audit

@@ -3,9 +3,8 @@ package com.ylab.app.web.mapper;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
 import com.ylab.app.web.dto.WorkoutAdditionalParamsDto;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * Interface for mapping workout additional parameters entities to workout additional parameters data transfer objects (DTO) and vice versa, using MapStruct.
@@ -13,9 +12,8 @@ import org.mapstruct.factory.Mappers;
  * @author razlivinsky
  * @since 18.04.2024
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface WorkoutAdditionalParamsMapper {
-    WorkoutAdditionalParamsMapper INSTANCE = Mappers.getMapper(WorkoutAdditionalParamsMapper.class);
 
     /**
      * Maps workout additional parameters entity to workout additional parameters data transfer object (DTO).
@@ -23,12 +21,15 @@ public interface WorkoutAdditionalParamsMapper {
      * @param workoutAdditionalParams the workout additional parameters entity to map
      * @return the workout additional parameters data transfer object
      */
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "params", source = "params"),
-            @Mapping(target = "value", source = "value")
-    })
     WorkoutAdditionalParamsDto workoutAdditionalParamsToWorkoutAdditionalParamsDto(WorkoutAdditionalParams workoutAdditionalParams);
+
+    /**
+     * Converts a list of WorkoutAdditionalParams entities to a list of WorkoutAdditionalParamsDto objects.
+     *
+     * @param list the list of WorkoutAdditionalParams entities to be converted
+     * @return the list of WorkoutAdditionalParamsDto objects
+     */
+    List<WorkoutAdditionalParamsDto> listWorkoutAdditionalParamsToWorkoutAdditionalParamsDto(List<WorkoutAdditionalParams> list);
 
     /**
      * Maps workout additional parameters data transfer object (DTO) to workout additional parameters entity.
@@ -36,10 +37,5 @@ public interface WorkoutAdditionalParamsMapper {
      * @param workoutAdditionalParamsDto the workout additional parameters data transfer object to map
      * @return the workout additional parameters entity
      */
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "params", source = "params"),
-            @Mapping(target = "value", source = "value")
-    })
     WorkoutAdditionalParams workoutAdditionalParamsDtoToWorkoutAdditionalParams(WorkoutAdditionalParamsDto workoutAdditionalParamsDto);
 }

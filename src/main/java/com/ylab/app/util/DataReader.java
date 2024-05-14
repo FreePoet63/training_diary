@@ -1,67 +1,69 @@
 package com.ylab.app.util;
 
-import java.util.ResourceBundle;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ClassPathResource;
+
+import java.util.Objects;
 
 /**
- * DataReader class provides methods to retrieve data from resource bundles for database, liquibase migration, user query, and workout query.
+ * The DataReader class provides methods to retrieve data from resource bundles for database queries,
+ * liquibase migration, user queries, and workout queries.
  *
  * @author razlivinsky
  * @since 13.04.2024
  */
 public class DataReader {
-    private static ResourceBundle resourceBundleDatabaseData = ResourceBundle.getBundle("database");
-    private static ResourceBundle resourceBundleLiquibaseMigration = ResourceBundle.getBundle("liquibase");
-    private static ResourceBundle resourceBundleUsersQuery = ResourceBundle.getBundle("user_query");
-    private static ResourceBundle resourceBundleWorkoutQuery = ResourceBundle.getBundle("workout_query");
-    private static ResourceBundle resourceBundleAuditQuery = ResourceBundle.getBundle("audit_query");
+    public static final String DATABASE_CONFIG = "application.yml";
+    public static final String AUDIT_QUERY = "audit_query.yml";
+    public static final String USER_QUERY = "user_query.yml";
+    public static final String WORKOUT_QUERY = "workout_query.yml";
 
     /**
-     * Retrieves the database data for the given key.
+     * Reads the database data query string specified by the value.
      *
-     * @param key the key for retrieving database data
-     * @return the database data corresponding to the given key
+     * @param value the key for the database data query string
+     * @return the database data string
      */
-    public static String getDatabaseData(String key){
-        return resourceBundleDatabaseData.getString(key);
+    public static String readDatabaseConfiguration(String value) {
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new ClassPathResource(DATABASE_CONFIG));
+        return Objects.requireNonNull(yaml.getObject()).getProperty(value);
     }
 
     /**
-     * Retrieves the liquibase migration data for the given key.
+     * Reads the user query string specified by the value.
      *
-     * @param key the key for retrieving liquibase migration data
-     * @return the liquibase migration data corresponding to the given key
+     * @param value the key for the user query string
+     * @return the user query string
      */
-    public static String getLiquibaseMigration(String key){
-        return resourceBundleLiquibaseMigration.getString(key);
+    public static String readUserQuery(String value) {
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new ClassPathResource(USER_QUERY));
+        return Objects.requireNonNull(yaml.getObject()).getProperty(value);
+    }
+
+
+    /**
+     * Reads the workout query string specified by the value.
+     *
+     * @param value the key for the workout query string
+     * @return the workout query string
+     */
+    public static String readWorkoutQuery(String value) {
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new ClassPathResource(WORKOUT_QUERY));
+        return Objects.requireNonNull(yaml.getObject()).getProperty(value);
     }
 
     /**
-     * Retrieves the user query data for the given key.
+     * Reads the audit query string specified by the value.
      *
-     * @param key the key for retrieving user query data
-     * @return the user query data corresponding to the given key
+     * @param value the key for the audit query string
+     * @return the audit query string
      */
-    public static String getUserQuery(String key){
-        return resourceBundleUsersQuery.getString(key);
-    }
-
-    /**
-     * Retrieves the workout query data for the given key.
-     *
-     * @param key the key for retrieving workout query data
-     * @return the workout query data corresponding to the given key
-     */
-    public static String getWorkoutQuery(String key){
-        return resourceBundleWorkoutQuery.getString(key);
-    }
-
-    /**
-     * Gets audit query.
-     *
-     * @param key the key
-     * @return the audit query
-     */
-    public static String getAuditQuery(String key) {
-        return resourceBundleAuditQuery.getString(key);
+    public static String readAuditQuery(String value) {
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new ClassPathResource(AUDIT_QUERY));
+        return Objects.requireNonNull(yaml.getObject()).getProperty(value);
     }
 }

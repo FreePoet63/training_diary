@@ -1,10 +1,7 @@
 package com.ylab.app.service;
 
 import com.ylab.app.model.user.User;
-import com.ylab.app.model.user.UserRole;
-import com.ylab.app.web.dto.UserDto;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -16,21 +13,13 @@ import java.util.List;
 public interface UserService {
 
     /**
-     * Registers a new user with the given name, password, and role.
-     *  @param name     the name of the user
-     * @param password the password for the user
-     * @return
-     */
-    User registerUser(String name, String password);
-
-    /**
-     * Logs in a user with the name and password.
+     * Registers a new user with the provided name and password.
      *
      * @param name     the name of the user
-     * @param password the password of the user
-     * @return the logged-in user
+     * @param password the password for the user
+     * @return the newly registered User object
      */
-    User loginUser(String name, String password);
+    User registerUser(String name, String password);
 
     /**
      * Checks if the user has the admin role.
@@ -44,9 +33,8 @@ public interface UserService {
      * Retrieves a list of all users in the system.
      *
      * @return the list of all users
-     * @throws SQLException the sql exception
      */
-    List<User> getAllUsers() throws SQLException;
+    List<User> getAllUsers();
 
     /**
      * Retrieves a user by their ID.
