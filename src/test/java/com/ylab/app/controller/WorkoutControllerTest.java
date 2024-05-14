@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * @since 07.05.2024
  */
 @ExtendWith(MockitoExtension.class)
-class WorkoutControllerTest {
+public class WorkoutControllerTest {
     @Mock
     private UserDetails userDetails;
 

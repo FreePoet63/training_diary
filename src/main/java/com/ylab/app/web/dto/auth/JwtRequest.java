@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "Request for login")
 public class JwtRequest {
-    @Schema(description = "name", example = "test")
+    @Schema(description = "name", example = "ylab")
     @NotNull(message = "Username must be not null.")
     private String username;
 
-    @Schema(description = "password", example = "test")
+    @Schema(description = "password", example = "ylab")
     @NotNull(message = "Password must be not null.")
     private String password;
 }

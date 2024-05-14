@@ -24,12 +24,12 @@ public class UserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
-    @Schema(description = "User name", example = "Y_lab")
+    @Schema(description = "User name", example = "ylab")
     @NotNull(message = "Name must be not null.")
     @Length(max = 255, message = "Name length must be smaller than 255 symbols.")
     private String name;
 
-    @Schema(description = "User password", example = "Y_lab")
+    @Schema(description = "User password", example = "ylab")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull(message = "Password must be not null.")
     private String password;

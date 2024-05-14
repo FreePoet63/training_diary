@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
     private final UserService userService;
-
     private final UserMapper userMapper;
 
     /**

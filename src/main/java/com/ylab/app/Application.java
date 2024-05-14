@@ -16,10 +16,12 @@ public class Application implements WebApplicationInitializer {
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         context.scan("com.ylab.app");
         servletContext.addListener(new ContextLoaderListener(context));
-        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("mvc", new DispatcherServlet(context));
+        ServletRegistration.Dynamic dispatcher =
+                servletContext.addServlet("mvc", new DispatcherServlet(context));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/*");
-        FilterRegistration.Dynamic springSecurityFilterChain = servletContext.addFilter("springSecurityFilterChain", new DelegatingFilterProxy());
+        FilterRegistration.Dynamic springSecurityFilterChain = servletContext
+                .addFilter("springSecurityFilterChain", new DelegatingFilterProxy());
         springSecurityFilterChain.addMappingForUrlPatterns(null, false, "/*");
     }
 }
