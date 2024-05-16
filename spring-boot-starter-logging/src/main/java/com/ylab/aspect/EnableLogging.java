@@ -1,6 +1,6 @@
-package com.ylab.app.aspect;
+package com.ylab.aspect;
 
-import com.ylab.app.aspect.config.LoggingAspectConfiguration;
+import com.ylab.config.LoggingAspectConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -23,7 +23,7 @@ import java.lang.annotation.*;
  * </pre>
  *
  * @author razlivinsky
- * @since 05.05.2024
+ * @since 22.02.2024
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

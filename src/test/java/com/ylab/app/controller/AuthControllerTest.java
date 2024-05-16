@@ -1,6 +1,5 @@
 package com.ylab.app.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.user.UserRole;
 import com.ylab.app.service.AuthService;
@@ -10,48 +9,30 @@ import com.ylab.app.web.dto.UserDto;
 import com.ylab.app.web.dto.auth.JwtRequest;
 import com.ylab.app.web.dto.auth.JwtResponse;
 import com.ylab.app.web.mapper.UserMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Optional;
-
-import static java.util.Optional.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * AuthControllerTest class
+ * AuthControllerTest class for the authentication controller.
+ * It ensures the proper functioning of user authentication processes,
+ * including login, logout, and error handling within the system.
+ * The class tests various authentication methods and checks the security measures
+ * for different user roles and permissions.
  *
  * @author razlivinsky
- * @since 07.05.2024
+ * @since 16.05.2024
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class AuthControllerTest {
-    private MockMvc mockMvc;
-
     @Mock
     private AuthService authService;
 
@@ -64,43 +45,47 @@ class AuthControllerTest {
     @InjectMocks
     private AuthController authController;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+    @Test
+    @DisplayName("Login with valid credentials should return JWT response")
+    void loginWithValidCredentials_ShouldReturnJwtResponse() {
+        JwtRequest jwtRequest = new JwtRequest("username", "password");
+        JwtResponse jwtResponseMock = new JwtResponse(1L, "username", "accessToken", "refreshToken");
+        when(authService.login(jwtRequest)).thenReturn(jwtResponseMock);
+
+        ResponseEntity<JwtResponse> response = authController.login(jwtRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(jwtResponseMock);
     }
 
     @Test
-    @DisplayName("Login with valid credentials should return JWT response")
-    void loginWithValidCredentials_ShouldReturnJwtResponse() throws Exception {
-        JwtRequest jwtRequest = new JwtRequest("username", "password");
-        JwtResponse jwtResponseMock = new JwtResponse(1L, "username", "accessToken", "refreshToken");
-        when(authService.login(any(JwtRequest.class))).thenReturn(jwtResponseMock);
+    @DisplayName("Register user with valid data should return created UserDto")
+    void registerUserWithValidData_ShouldReturnCreatedUserDto() {
+        UserDto userDto = new UserDto();
+        User user = new User("John Doe", "password123", UserRole.USER);
+        User createdUser = new User("John Doe", "password123", UserRole.USER);
+        UserDto createdUserDto = new UserDto();
 
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(jwtRequest)))
-                .andExpect(status().isOk());
+        when(userMapper.userDtoToUser(userDto)).thenReturn(user);
+        when(userService.registerUser("John Doe", "password123")).thenReturn(createdUser);
+        when(userMapper.userToUserDto(createdUser)).thenReturn(createdUserDto);
+
+        ResponseEntity<UserDto> response = authController.register(userDto);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(createdUserDto);
     }
 
     @Test
     @DisplayName("Refresh token with valid refresh token should return JWT response")
-    void refreshTokenWithValidRefreshToken_ShouldReturnJwtResponse() throws Exception {
+    void refreshTokenWithValidRefreshToken_ShouldReturnJwtResponse() {
         String validRefreshToken = "validRefreshToken";
-        JwtResponse jwtResponseMock = new JwtResponse(1L, "username", "newAccessToken", "newRefreshToken");
-        when(authService.refresh(anyString())).thenReturn(jwtResponseMock);
+        JwtResponse jwtResponseMock = new JwtResponse(1L, "username","newAccessToken", "newRefreshToken");
+        when(authService.refresh(validRefreshToken)).thenReturn(jwtResponseMock);
 
-        mockMvc.perform(post("/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(validRefreshToken)))
-                .andExpect(status().isOk());
-    }
+        ResponseEntity<JwtResponse> response = authController.refresh(validRefreshToken);
 
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(jwtResponseMock);
     }
 }

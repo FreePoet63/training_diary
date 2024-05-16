@@ -1,27 +1,11 @@
 package com.ylab.app;
 
-import jakarta.servlet.FilterRegistration;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRegistration;
-import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public class Application implements WebApplicationInitializer {
-    @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
-        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-        context.scan("com.ylab.app");
-        servletContext.addListener(new ContextLoaderListener(context));
-        ServletRegistration.Dynamic dispatcher =
-                servletContext.addServlet("mvc", new DispatcherServlet(context));
-        dispatcher.setLoadOnStartup(1);
-        dispatcher.addMapping("/*");
-        FilterRegistration.Dynamic springSecurityFilterChain = servletContext
-                .addFilter("springSecurityFilterChain", new DelegatingFilterProxy());
-        springSecurityFilterChain.addMappingForUrlPatterns(null, false, "/*");
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
     }
 }

@@ -1,4 +1,4 @@
-package com.ylab.app.aspect;
+package com.ylab.aspect;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -28,14 +28,14 @@ import java.util.Arrays;
  * </pre>
  *
  * @author razlivinsky
- * @since 05.05.2024
+ * @since 22.02.2024
  */
 @Aspect
 public class LoggingAspectAnnotation {
     /**
      * Defines a pointcut to target method executions within types annotated with {@link EnableLogging}.
      */
-    @Pointcut("within(@com.ylab.app.aspect.EnableLogging *) && execution(* * (..))")
+    @Pointcut("within(@com.ylab.aspect.EnableLogging *) && execution(* * (..))")
     public void enableLoggingPointcut() {}
 
     /**

@@ -1,6 +1,5 @@
 package com.ylab.app.web.controller;
 
-import com.ylab.app.aspect.EnableLogging;
 import com.ylab.app.model.user.User;
 import com.ylab.app.model.workout.Workout;
 import com.ylab.app.model.workout.WorkoutAdditionalParams;
@@ -11,10 +10,13 @@ import com.ylab.app.web.dto.WorkoutAdditionalParamsDto;
 import com.ylab.app.web.dto.WorkoutDto;
 import com.ylab.app.web.mapper.WorkoutAdditionalParamsMapper;
 import com.ylab.app.web.mapper.WorkoutMapper;
+import com.ylab.aspect.EnableLogging;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
@@ -50,6 +52,7 @@ public class WorkoutController {
      * @return ResponseEntity containing the added workout details
      */
     @PostMapping("/")
+    @Operation(summary = "Add workoutDto")
     public ResponseEntity<WorkoutDto> addWorkout(@AuthenticationPrincipal UserDetails userDetails, @Validated @RequestBody WorkoutDto workoutDto) {
         User user = userService.getUserByLogin(userDetails.getUsername());
         Workout workout = workoutMapper.workoutDtoToWorkout(workoutDto);
@@ -65,6 +68,7 @@ public class WorkoutController {
      * @return ResponseEntity with a list of workouts
      */
     @GetMapping("/date/{targetDate}")
+    @Operation(summary = "Get all workoutDto by target date")
     public ResponseEntity<List<WorkoutDto>> getWorkoutsOnDate(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String targetDate) {
         User user = userService.getUserByLogin(userDetails.getUsername());
         LocalDateTime date = LocalDateTime.parse(targetDate);
@@ -82,6 +86,7 @@ public class WorkoutController {
      * @return ResponseEntity with the updated workout details
      */
     @PutMapping("/{workoutId}")
+    @Operation(summary = "Update workoutDto")
     public ResponseEntity<WorkoutDto> editWorkout(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long workoutId, @Validated @RequestBody WorkoutDto workoutDto) {
         User user = userService.getUserByLogin(userDetails.getUsername());
         Workout workout = workoutMapper.workoutDtoToWorkout(workoutDto);
@@ -96,6 +101,7 @@ public class WorkoutController {
      * @return ResponseEntity with no content status
      */
     @DeleteMapping("/{workoutId}")
+    @Operation(summary = "Delete workoutDto")
     public ResponseEntity<Void> deleteWorkout(@PathVariable Long workoutId) {
         workoutService.deleteWorkout(workoutId);
         return ResponseEntity.noContent().build();
@@ -108,6 +114,7 @@ public class WorkoutController {
      * @return ResponseEntity containing the requested workout
      */
     @GetMapping("/{workoutId}")
+    @Operation(summary = "Get workoutDto by id")
     public ResponseEntity<WorkoutDto> getWorkoutById(@PathVariable Long workoutId) {
         Workout workout = workoutService.getWorkoutById(workoutId);
         WorkoutDto workoutDto = workoutMapper.workoutToWorkoutDto(workout);
@@ -123,6 +130,7 @@ public class WorkoutController {
      * @return ResponseEntity with the total calories burned by the user during the specified time period
      */
     @GetMapping("/startDate/{startDate}/endDate/{endDate}")
+    @Operation(summary = "Get total calories")
     public ResponseEntity<Integer> getCaloriesBurnedInTimePeriod(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String startDate,
@@ -143,6 +151,7 @@ public class WorkoutController {
      * @return ResponseEntity with a list of additional parameters statistics for the specified workout type
      */
     @GetMapping("/type/{type}/startDate/{startDate}/endDate/{endDate}")
+    @Operation(summary = "Get Workout parametersDto")
     public ResponseEntity<List<WorkoutAdditionalParamsDto>> getAdditionalParamsStats(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable WorkoutType type,
@@ -162,7 +171,9 @@ public class WorkoutController {
      * @param userDetails the authenticated user requesting the information
      * @return ResponseEntity with a list of all workouts for the specified user
      */
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/all/workout")
+    @Operation(summary = "Get all workoutsDto")
     public ResponseEntity<List<WorkoutDto>> getAllReadingsWorkouts(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByLogin(userDetails.getUsername());
         List<Workout> workoutList = workoutService.getAllReadingsWorkouts(user);

@@ -1,6 +1,6 @@
-package com.ylab.app.util;
+package com.ylab.util;
 
-import static com.ylab.app.util.DataReader.readAuditQuery;
+import static com.ylab.util.DataReaderAudit.readAuditQuery;
 
 /**
  * DataResultAuditQuery class provides SQL queries for auditing messages.

@@ -21,9 +21,6 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 
-import static com.ylab.app.service.props.JwtProperties.ACCESS;
-import static com.ylab.app.service.props.JwtProperties.SECRET;
-
 /**
  * JwtTokenProvider class handles the creation and validation of JWT tokens for authentication.
  *
@@ -33,6 +30,7 @@ import static com.ylab.app.service.props.JwtProperties.SECRET;
 @Service
 @RequiredArgsConstructor
 public class JwtTokenProvider {
+    private final JwtProperties jwtProperties;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private Key key;
@@ -42,7 +40,7 @@ public class JwtTokenProvider {
      */
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(SECRET.getBytes());
+        this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
 
     }
 
@@ -59,7 +57,7 @@ public class JwtTokenProvider {
         claims.put("id", userId);
         claims.put("roles", role);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + ACCESS);
+        Date validity = new Date(now.getTime() + jwtProperties.getAccess());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -79,7 +77,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("id", userId);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + ACCESS);
+        Date validity = new Date(now.getTime() + jwtProperties.getAccess());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)

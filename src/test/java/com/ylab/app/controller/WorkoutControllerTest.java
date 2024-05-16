@@ -31,10 +31,13 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
- * WorkoutControllerTest class
+ * WorkoutControllerTest class for the workout controller.
+ * It verifies the controller's functionality, including adding,
+ * deleting, and updating exercises in the system.
+ * Tests various access levels and the system's response to incorrect data.
  *
  * @author razlivinsky
- * @since 07.05.2024
+ * @since 16.05.2024
  */
 @ExtendWith(MockitoExtension.class)
 public class WorkoutControllerTest {
@@ -158,7 +161,6 @@ public class WorkoutControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).isEqualTo(additionalParamsDtoList);
     }
-
 
     @Test
     @DisplayName("Get all workouts for a specific user should return list of workouts")

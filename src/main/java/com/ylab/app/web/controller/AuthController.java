@@ -7,6 +7,8 @@ import com.ylab.app.web.dto.UserDto;
 import com.ylab.app.web.dto.auth.JwtRequest;
 import com.ylab.app.web.dto.auth.JwtResponse;
 import com.ylab.app.web.mapper.UserMapper;
+import com.ylab.aspect.EnableLogging;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @Validated
 @Tag(name = "Auth Controller", description = "Auth API")
+@EnableLogging
 public class AuthController {
     private final AuthService authService;
     private final UserService userService;
@@ -40,6 +43,7 @@ public class AuthController {
      * @return the JWT response containing access and refresh tokens
      */
     @PostMapping("/login")
+    @Operation(summary = "Authorization user")
     public ResponseEntity<JwtResponse> login(@Validated @RequestBody JwtRequest jwtRequest) {
         JwtResponse response = authService.login(jwtRequest);
         return ResponseEntity.ok(response);
@@ -52,6 +56,7 @@ public class AuthController {
      * @return the UserDto of the registered user
      */
     @PostMapping("/register")
+    @Operation(summary = "Registration user")
     public ResponseEntity<UserDto> register(@Validated @RequestBody UserDto dto) {
         User user = userMapper.userDtoToUser(dto);
         User createUser = userService.registerUser(user.getName(), user.getPassword());
@@ -66,6 +71,7 @@ public class AuthController {
      * @return the JWT response with the refreshed access token
      */
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh token")
     public ResponseEntity<JwtResponse> refresh(@RequestBody String refreshToken) {
         JwtResponse response = authService.refresh(refreshToken);
         return ResponseEntity.ok(response);

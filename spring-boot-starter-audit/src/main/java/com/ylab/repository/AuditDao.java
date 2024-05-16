@@ -1,6 +1,6 @@
-package com.ylab.app.dbService.dao;
+package com.ylab.repository;
 
-import com.ylab.app.model.audit.AuditModel;
+import com.ylab.model.AuditModel;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * The AuditDao interface provides methods for sending and retrieving audit messages.
  *
  * @author razlivinsky
- * @since 17.02.2024
+ * @since 14.05.2024
  */
 public interface AuditDao {
 

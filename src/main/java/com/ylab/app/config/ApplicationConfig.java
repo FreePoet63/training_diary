@@ -2,6 +2,11 @@ package com.ylab.app.config;
 
 import com.ylab.app.web.security.JwtTokenFilter;
 import com.ylab.app.web.security.JwtTokenProvider;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.ApplicationContext;
@@ -11,7 +16,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,8 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 /**
  * ApplicationConfig class is responsible for configuring security beans using Spring Security.
@@ -31,24 +33,10 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 @RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class ApplicationConfig {
     private final JwtTokenProvider tokenProvider;
     private final ApplicationContext context;
-
-    /**
-     * Constructs an {@link MvcRequestMatcher.Builder} for creating customized MVC request matchers with an empty servlet path.
-     *
-     * @param introspector the {@link HandlerMappingIntrospector} for accurate URL matching with existing handler mappings.
-     * @return a configured {@link MvcRequestMatcher.Builder} ready for customization.
-     */
-    @Bean
-    public MvcRequestMatcher.Builder matcher(HandlerMappingIntrospector introspector){
-        MvcRequestMatcher.Builder builder = new MvcRequestMatcher.Builder(introspector);
-        builder.servletPath("");
-        return builder;
-    }
 
     /**
      * Password encoder bean for encoding passwords using BCryptPasswordEncoder.
@@ -73,6 +61,32 @@ public class ApplicationConfig {
     }
 
     /**
+     * Defines and provides the OpenAPI document configuration with security settings and API information.
+     *
+     * @return the OpenAPI document representing the API documentation.
+     */
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(
+                        new Components()
+                                .addSecuritySchemes("bearerAuth",
+                                        new SecurityScheme()
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")
+                                )
+                )
+                .info(
+                        new Info()
+                                .title("Training Diary Y_LAB API")
+                                .description("Demo Spring Boot Application")
+                                .version("1.0")
+                );
+    }
+
+    /**
      * Filter chain for configuring security rules and filters using HttpSecurity.
      *
      * @param httpSecurity the HttpSecurity object
@@ -82,7 +96,7 @@ public class ApplicationConfig {
     @Bean
     @SneakyThrows
     public SecurityFilterChain filterChain(
-            final HttpSecurity httpSecurity, MvcRequestMatcher.Builder builder
+            final HttpSecurity httpSecurity
     ) {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
@@ -114,11 +128,11 @@ public class ApplicationConfig {
                                                     .write("Unauthorized.");
                                         }))
                 .authorizeHttpRequests(configurer ->
-                        configurer.requestMatchers(builder.pattern("/auth/**"))
+                        configurer.requestMatchers("/auth/**")
                                 .permitAll()
-                                .requestMatchers(builder.pattern("/swagger-ui/**"))
+                                .requestMatchers("/swagger-ui/**")
                                 .permitAll()
-                                .requestMatchers(builder.pattern("/v3/**"))
+                                .requestMatchers("/v3/**")
                                 .permitAll()
                                 .anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
