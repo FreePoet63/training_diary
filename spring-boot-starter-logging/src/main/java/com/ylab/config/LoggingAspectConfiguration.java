@@ -1,6 +1,6 @@
-package com.ylab.app.aspect.config;
+package com.ylab.config;
 
-import com.ylab.app.aspect.LoggingAspectAnnotation;
+import com.ylab.aspect.LoggingAspectAnnotation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,11 +10,10 @@ import org.springframework.context.annotation.Configuration;
  * This class is used to configure the logging aspect by defining a bean LoggingAspectAnnotation.
  *
  * @author razlivinsky
- * @since 06.05.2024
+ * @since 06.03.2024
  */
 @Configuration
 public class LoggingAspectConfiguration {
-
     /**
      * Creates a bean for logging aspect based on the annotation.
      *

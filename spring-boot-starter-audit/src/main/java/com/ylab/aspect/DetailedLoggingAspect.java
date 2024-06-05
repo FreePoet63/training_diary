@@ -1,14 +1,15 @@
-package com.ylab.app.aspect;
+package com.ylab.aspect;
 
-import com.ylab.app.dbService.dao.AuditDao;
-import com.ylab.app.model.audit.AuditModel;
-import lombok.RequiredArgsConstructor;
+import com.ylab.model.AuditModel;
+import com.ylab.repository.AuditDao;
+import com.ylab.repository.impl.AuditDaoImpl;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,14 +20,21 @@ import org.springframework.stereotype.Component;
  * method execution and log information before, after successful completion, or in case of failure.
  *
  * @author razlivinsky
- * @since 26.04.2024
+ * @since 14.05.2024
  */
 @Aspect
 @Component
-@RequiredArgsConstructor
 public class DetailedLoggingAspect {
     private final AuditDao auditDao;
 
+    /**
+     * Instantiates a new detailed logging aspect.
+     *
+     * @param jdbcTemplate the jdbc template used for database operations
+     */
+    public DetailedLoggingAspect(JdbcTemplate jdbcTemplate) {
+        this.auditDao = new AuditDaoImpl(jdbcTemplate);
+    }
 
     /**
      * Intercepts the method execution before it begins to log the input parameters.

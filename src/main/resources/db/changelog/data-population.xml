@@ -5,19 +5,19 @@
         <insert tableName="usr" schemaName="my_schema">
             <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
             <column name="name" value="Nata"/>
-            <column name="password" value="1963"/>
+            <column name="password" value="$2a$10$z71AZTuBobO7gyr6hQcy7O7myJI4kXxxaWDcPi7iY.nD6vZGRazKO"/>
             <column name="role" value="USER"/>
         </insert>
         <insert tableName="usr" schemaName="my_schema">
             <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
             <column name="name" value="Olya"/>
-            <column name="password" value="1111"/>
+            <column name="password" value="$2a$10$aGf.QywocF3ttI35Szks..Rb1dpT1Idwo6tdY9yLKeql/FyiY3TeS"/>
             <column name="role" value="USER"/>
         </insert>
         <insert tableName="usr" schemaName="my_schema">
             <column name="id" valueNumeric="nextval('my_schema.seq_usr_id')"/>
-            <column name="name" value="Venya"/>
-            <column name="password" value="ylab"/>
+            <column name="name" value="admin"/>
+            <column name="password" value="$2a$10$qCe5wpLJa4r6Xz31AGh7Z.Q2a9nT3QsD9HqHfJXr542XJSHJSqvH6"/>
             <column name="role" value="ADMIN"/>
         </insert>
     </changeSet>

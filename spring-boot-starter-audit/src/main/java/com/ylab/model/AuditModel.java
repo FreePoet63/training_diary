@@ -1,4 +1,4 @@
-package com.ylab.app.model.audit;
+package com.ylab.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  * This class encapsulates information about an audit message, including its ID and content.
  *
  * @author razlivinsky
- * @since 17.04.2024
+ * @since 14.05.2024
  */
 @Data
 @NoArgsConstructor

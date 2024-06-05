@@ -1,10 +1,11 @@
 package com.ylab.app.web.controller;
 
-import com.ylab.app.aspect.EnableLogging;
 import com.ylab.app.model.user.User;
 import com.ylab.app.service.UserService;
 import com.ylab.app.web.dto.UserDto;
 import com.ylab.app.web.mapper.UserMapper;
+import com.ylab.aspect.EnableLogging;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,7 @@ public class UserController {
      * @return a response entity containing the user DTO with the requested user information
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Get userDto by id")
     public ResponseEntity<UserDto> getUserById(@PathVariable long id) {
         User user = userService.getUserById(id);
         UserDto userDto = userMapper.userToUserDto(user);
@@ -52,6 +54,7 @@ public class UserController {
      * @return a response entity containing a list of user DTOs representing all users
      */
     @GetMapping("/all")
+    @Operation(summary = "Get all userDto")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         List<UserDto> userDtos = userMapper.listUserToUserDto(users);

@@ -9,6 +9,7 @@ import com.ylab.app.web.dto.auth.JwtRequest;
 import com.ylab.app.web.dto.auth.JwtResponse;
 import com.ylab.app.web.security.JwtTokenProvider;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,7 +20,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 /**
- * AuthServiceTest class
+ * AuthServiceTest class is designed to verify user authentication.
+ * It utilizes Mockito to create mock objects necessary for testing.
+ * Covers the main authentication scenarios, including successful system login,
+ * handling of incorrect credentials, and exception processing.
  *
  * @author razlivinsky
  * @since 07.05.2024
@@ -39,6 +43,7 @@ public class AuthServiceTest {
     private AuthServiceImpl authService;
 
     @Test
+    @DisplayName("Successful User Login")
     void login() {
         Long userId = 1L;
         String username = "username";
@@ -73,6 +78,7 @@ public class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Login failure on incorrect username")
     void loginWithIncorrectUsername() {
         String username = "username";
         String password = "password";
@@ -89,6 +95,7 @@ public class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Successful token refresh")
     void refresh() {
         String refreshToken = "refreshToken";
         String accessToken = "accessToken";
